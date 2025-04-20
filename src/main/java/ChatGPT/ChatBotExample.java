@@ -1,12 +1,19 @@
 package ChatGPT;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class ChatBotExample {
     public static void main(String[] args) {
-        // Replace with your actual OpenAI API key
-        String apiKey = "your-api-key-here";
+        Dotenv dotenv = Dotenv.load();
+        String apiKey = dotenv.get("OPENAI_API_KEY");
+
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.err.println("Error: OPENAI_API_KEY not found in .env file");
+            System.exit(1);
+        }
+
         ChatGPT chatGPT = new ChatGPT(apiKey);
         Scanner scanner = new Scanner(System.in);
 
