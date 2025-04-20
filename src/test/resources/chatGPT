@@ -1,0 +1,91 @@
+package org.example;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import okhttp3.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class GPTBot {
+    private static final String API_URL = "https://api.openai.com/v1/chat/completions";
+    private final String apiKey;
+    private final OkHttpClient client;
+    private final Gson gson;
+
+    public GPTBot(String apiKey) {
+        this.apiKey = apiKey;
+        this.client = new OkHttpClient();
+        this.gson = new Gson();
+    }
+
+    public String analyzeCode(String code, String task) throws IOException {
+        String prompt = String.format("Please analyze the following Java code and %s:\n\n%s", task, code);
+
+        JsonObject message = new JsonObject();
+        message.addProperty("role", "user");
+        message.addProperty("content", prompt);
+
+        List<JsonObject> messages = new ArrayList<>();
+        messages.add(message);
+
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("model", "gpt-3.5-turbo");
+        requestBody.add("messages", gson.toJsonTree(messages));
+
+        RequestBody body = RequestBody.create(
+            MediaType.parse("application/json"),
+            gson.toJson(requestBody)
+        );
+
+        Request request = new Request.Builder()
+            .url(API_URL)
+            .addHeader("Authorization", "Bearer " + apiKey)
+            .addHeader("Content-Type", "application/json")
+            .post(body)
+            .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected response code: " + response.code());
+            }
+
+            String responseBody = response.body().string();
+            JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
+            return jsonResponse.getAsJsonArray("choices")
+                .get(0)
+                .getAsJsonObject()
+                .getAsJsonObject("message")
+                .get("content")
+                .getAsString();
+        }
+    }
+
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Please provide your OpenAI API key as an argument");
+            return;
+        }
+
+        String apiKey = args[0];
+        GPTBot bot = new GPTBot(apiKey);
+
+        // Example usage
+        String code = """
+            public class Example {
+                public static void main(String[] args) {
+                    System.out.println("Hello, World!");
+                }
+            }
+            """;
+
+        try {
+            String result = bot.analyzeCode(code, "explain what this code does");
+            System.out.println("GPT Response:");
+            System.out.println(result);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+}
