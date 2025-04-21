@@ -6,7 +6,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Vector;
 
 public class CalendarUI extends JFrame {
     private CardLayout cardLayout;
@@ -60,12 +59,12 @@ public class CalendarUI extends JFrame {
         panel.add(label, BorderLayout.NORTH);
 
         String[] rowNames = {"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
-        String[] columnNames = {"時段一", "時段二", "時段三", "時段四", "時段五"};
+        String[] columnNames = {" "};
         // 建立行事曆主表格資料
         String[][] tableData = new String[rowNames.length][columnNames.length]; // 預設為空
 
         // 表格模型
-        DefaultTableModel scheduleModel = new DefaultTableModel(tableData, 1);
+        DefaultTableModel scheduleModel = new DefaultTableModel(tableData, 7);
         JTable scheduleTable = new JTable(scheduleModel);
         scheduleTable.setRowHeight(80);
         scheduleTable.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
