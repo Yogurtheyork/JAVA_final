@@ -6,12 +6,11 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Vector;
 
 public class CalendarUI extends JFrame {
     private CardLayout cardLayout;
     private JPanel viewPanel;
-
-    private DefaultTableModel scheduleModel;
 
     public CalendarUI() {
         setTitle("行事曆切換視圖");
@@ -34,18 +33,15 @@ public class CalendarUI extends JFrame {
         viewPanel = new JPanel(cardLayout);
 
         // 各種視圖內容
+        JPanel dayView = createViewPanel("今日");
         JPanel weekView = createWeekView(); // 週視圖
         JPanel monthView = createViewPanel("這是月視圖");
         JPanel yearView = createViewPanel("這是年視圖");
 
+        //viewPanel.add(dayView, "Day");
         viewPanel.add(weekView, "Week");
         viewPanel.add(monthView, "Month");
         viewPanel.add(yearView, "Year");
-
-        // 按鈕事件綁定
-        weekButton.addActionListener(e -> cardLayout.show(viewPanel, "Week"));
-        monthButton.addActionListener(e -> cardLayout.show(viewPanel, "Month"));
-        yearButton.addActionListener(e -> cardLayout.show(viewPanel, "Year"));
 
         // 加入元件到主視窗
         add(buttonPanel, BorderLayout.NORTH);
@@ -63,39 +59,40 @@ public class CalendarUI extends JFrame {
         label.setFont(new Font("微軟正黑體", Font.BOLD, 20));
         panel.add(label, BorderLayout.NORTH);
 
-        // 設置表格模型，表格有 7 列（代表 7 天），每一天的行程
-        String[] columnNames = {"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"};
-        scheduleModel = new DefaultTableModel(columnNames, 1); // 1 行用於顯示這一週
+        String[] rowNames = {"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
+        String[] columnNames = {"時段一", "時段二", "時段三", "時段四", "時段五"};
+        // 建立行事曆主表格資料
+        String[][] tableData = new String[rowNames.length][columnNames.length]; // 預設為空
 
-        // 建立 JTable 來顯示週視圖
+        // 表格模型
+        DefaultTableModel scheduleModel = new DefaultTableModel(tableData, 1);
         JTable scheduleTable = new JTable(scheduleModel);
-        scheduleTable.setRowHeight(100); // 每一行的高度
+        scheduleTable.setRowHeight(80);
         scheduleTable.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
-
-        // 讓表格支持自動換行
         scheduleTable.setCellSelectionEnabled(true);
         scheduleTable.setDefaultRenderer(Object.class, new ScheduleCellRenderer());
 
+        // 建立 row name 表格（單欄只顯示星期幾）
+        String[][] rowData = new String[rowNames.length][1];
+        for (int i = 0; i < rowNames.length; i++) {
+            rowData[i][0] = rowNames[i];
+        }
+        JTable rowTable = new JTable(rowData, new String[]{""});
+        rowTable.setRowHeight(scheduleTable.getRowHeight());
+        rowTable.setEnabled(false);
+        rowTable.setPreferredScrollableViewportSize(new Dimension(60, 0));
+        rowTable.setFont(new Font("微軟正黑體", Font.BOLD, 14));
+
+        // 加入 scrollPane 並放 rowTable 作為左側 row header
         JScrollPane scrollPane = new JScrollPane(scheduleTable);
+        scrollPane.setRowHeaderView(rowTable);
+
         panel.add(scrollPane, BorderLayout.CENTER);
-
-        // 新增行程按鈕
-        JButton addButton = new JButton("新增事件");
-        addButton.addActionListener(e -> {
-            String input = JOptionPane.showInputDialog(CalendarUI.this, "輸入事件內容：");
-            if (input != null && !input.trim().isEmpty()) {
-                // 將事件添加到選中的單元格中
-                int selectedRow = scheduleTable.getSelectedRow();
-                int selectedColumn = scheduleTable.getSelectedColumn();
-                if (selectedRow != -1 && selectedColumn != -1) {
-                    scheduleModel.setValueAt("🗓️ " + input.trim(), selectedRow, selectedColumn);
-                }
-            }
-        });
-        panel.add(addButton, BorderLayout.SOUTH);
-
         return panel;
     }
+
+    //TODO: 加入行程的編輯功能
+    //TODO: 加入重大事件，年曆只顯示每月份重大事件
 
     // 自定義渲染器，支持多行顯示
     private static class ScheduleCellRenderer extends JTextArea implements TableCellRenderer {
