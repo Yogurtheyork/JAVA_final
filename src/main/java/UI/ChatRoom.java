@@ -1,9 +1,10 @@
 package UI;
+//UI和事件
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+//GPT API
 import ChatGPT.ChatGPT;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
