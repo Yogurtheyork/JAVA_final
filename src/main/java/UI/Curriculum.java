@@ -214,4 +214,8 @@ public class Curriculum extends JFrame {
             }
         }
     }
+
+    private  void  sendToGPT() {
+        //TODO
+    }
 }
