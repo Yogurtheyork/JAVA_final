@@ -27,6 +27,11 @@ public class CalendarUI extends JFrame {
         buttonPanel.add(monthButton);
         buttonPanel.add(yearButton);
 
+        // 按鈕事件: 切換不同視圖
+        weekButton.addActionListener(e -> cardLayout.show(viewPanel, "Week"));
+        monthButton.addActionListener(e -> cardLayout.show(viewPanel, "Month"));
+        yearButton.addActionListener(e -> cardLayout.show(viewPanel, "Year"));
+
         // 中央視圖切換區域
         cardLayout = new CardLayout();
         viewPanel = new JPanel(cardLayout);
@@ -34,12 +39,13 @@ public class CalendarUI extends JFrame {
         // 各種視圖內容
         JPanel dayView = createViewPanel("今日");
         JPanel weekView = createWeekView(); // 週視圖
-        JPanel monthView = createViewPanel("這是月視圖");
-        JPanel yearView = createViewPanel("這是年視圖");
+        JPanel monthView = createMonthView();//月
+        JPanel yearView = createYearView();//月
 
         //viewPanel.add(dayView, "Day");
         viewPanel.add(weekView, "Week");
         viewPanel.add(monthView, "Month");
+        //JPanel monthView = createMonthView();
         viewPanel.add(yearView, "Year");
 
         // 加入元件到主視窗
@@ -90,6 +96,173 @@ public class CalendarUI extends JFrame {
         return panel;
     }
 
+    // 加入月視圖
+    private JPanel createMonthView() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // 初始日期
+        LocalDate[] currentDate = { LocalDate.now() }; // 用陣列包，方便內部修改
+
+        JLabel label = new JLabel("", SwingConstants.CENTER);
+        label.setFont(new Font("微軟正黑體", Font.BOLD, 24));
+        panel.add(label, BorderLayout.NORTH);
+
+        JPanel calendarPanel = new JPanel(new GridLayout(0, 7));
+        panel.add(calendarPanel, BorderLayout.CENTER);
+
+        // 上/下月按鈕
+        JPanel controlPanel = new JPanel();
+        JButton prevButton = new JButton("<< 上個月");
+        JButton nextButton = new JButton("下個月 >>");
+        controlPanel.add(prevButton);
+        controlPanel.add(nextButton);
+        panel.add(controlPanel, BorderLayout.SOUTH);
+
+        // 更新日曆內容
+        Runnable updateCalendar = () -> {
+            calendarPanel.removeAll();
+
+            LocalDate today = currentDate[0];
+            int year = today.getYear();
+            int month = today.getMonthValue();
+
+            label.setText("現在是 " + year + " 年 " + month + " 月");
+
+            String[] weekDays = {"日", "一", "二", "三", "四", "五", "六"};
+            for (String day : weekDays) {
+                JLabel dayLabel = new JLabel(day, SwingConstants.CENTER);
+                dayLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+                dayLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                calendarPanel.add(dayLabel);
+            }
+
+            LocalDate firstDay = LocalDate.of(year, month, 1);
+            int firstWeekDay = firstDay.getDayOfWeek().getValue();  // 星期一=1, 日=7
+            int blankDays = firstWeekDay % 7;
+
+            for (int i = 0; i < blankDays; i++) {
+                JLabel emptyLabel = new JLabel("");
+                emptyLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                calendarPanel.add(emptyLabel);
+            }
+
+            int daysInMonth = firstDay.lengthOfMonth();
+            for (int day = 1; day <= daysInMonth; day++) {
+                JLabel dayLabel = new JLabel(String.valueOf(day), SwingConstants.CENTER);
+                dayLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+                dayLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                calendarPanel.add(dayLabel);
+            }
+
+            calendarPanel.revalidate();
+            calendarPanel.repaint();
+        };
+
+        // 按鈕功能
+        prevButton.addActionListener(e -> {
+            currentDate[0] = currentDate[0].minusMonths(1);
+            updateCalendar.run();
+        });
+
+        nextButton.addActionListener(e -> {
+            currentDate[0] = currentDate[0].plusMonths(1);
+            updateCalendar.run();
+        });
+
+        updateCalendar.run();  // 初始化第一次
+        return panel;
+    }
+
+    private JPanel createMiniMonth(int year, int month) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        JLabel title = new JLabel(month + " 月", SwingConstants.CENTER);
+        title.setFont(new Font("微軟正黑體", Font.BOLD, 14));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel daysGrid = new JPanel(new GridLayout(0, 7)); // 星期日到星期六
+
+        String[] weekDays = {"日", "一", "二", "三", "四", "五", "六"};
+        for (String day : weekDays) {
+            JLabel dayLabel = new JLabel(day, SwingConstants.CENTER);
+            dayLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
+            daysGrid.add(dayLabel);
+        }
+
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        int firstWeekDay = firstDay.getDayOfWeek().getValue(); // 星期一=1，日=7
+        int blankDays = firstWeekDay % 7; // 調整讓星期日是0
+
+        for (int i = 0; i < blankDays; i++) {
+            daysGrid.add(new JLabel(""));
+        }
+
+        int daysInMonth = firstDay.lengthOfMonth();
+        for (int day = 1; day <= daysInMonth; day++) {
+            JLabel dayLabel = new JLabel(String.valueOf(day), SwingConstants.CENTER);
+            dayLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
+            daysGrid.add(dayLabel);
+        }
+
+        panel.add(daysGrid, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void updateYearPanel(JPanel monthsPanel, int year) {//help repaint the month
+        monthsPanel.removeAll();
+        for (int month = 1; month <= 12; month++) {
+            monthsPanel.add(createMiniMonth(year, month));
+        }
+    }
+    // 加入年視圖
+    private JPanel createYearView() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // 外層用陣列包裝，讓按鈕能修改值
+        final int[] currentYear = {LocalDate.now().getYear()};
+
+        // 標題區
+        JLabel yearLabel = new JLabel(currentYear[0] + " 年行事曆", SwingConstants.CENTER);
+        yearLabel.setFont(new Font("微軟正黑體", Font.BOLD, 24));
+        panel.add(yearLabel, BorderLayout.NORTH);
+
+        // 月份區域
+        JPanel monthsPanel = new JPanel(new GridLayout(3, 4, 10, 10));
+        // 預設先畫今年
+        updateYearPanel(monthsPanel, currentYear[0]);
+
+        // 加入月份面板
+        panel.add(monthsPanel, BorderLayout.CENTER);
+
+        // 下方控制按鈕
+        JPanel buttonPanel = new JPanel();
+        JButton prevButton = new JButton("<< 上一年");
+        JButton nextButton = new JButton("下一年 >>");
+
+        buttonPanel.add(prevButton);
+        buttonPanel.add(nextButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // 按鈕事件：換年份
+        prevButton.addActionListener(e -> {
+            currentYear[0]--;
+            yearLabel.setText(currentYear[0] + " 年行事曆");
+            updateYearPanel(monthsPanel, currentYear[0]);
+            panel.revalidate();
+            panel.repaint();
+        });
+
+        nextButton.addActionListener(e -> {
+            currentYear[0]++;
+            yearLabel.setText(currentYear[0] + " 年行事曆");
+            updateYearPanel(monthsPanel, currentYear[0]);
+            panel.revalidate();
+            panel.repaint();
+        });
+
+        return panel;
+    }
     //TODO: 加入行程的編輯功能
     //TODO: 加入重大事件，年曆只顯示每月份重大事件
 
