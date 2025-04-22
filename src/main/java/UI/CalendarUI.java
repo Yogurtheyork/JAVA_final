@@ -10,10 +10,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Timer;
+import java.util.List;
+import java.io.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class CalendarUI extends JFrame implements ActionListener {
     private static JLabel TaiwanTime;
@@ -27,8 +34,15 @@ public class CalendarUI extends JFrame implements ActionListener {
     private enum ViewMode {WEEK, MONTH, YEAR}
     private ViewMode currentView = ViewMode.MONTH; // Default view
 
+    // Event management
+    private List<CalendarEvent> events = new ArrayList<>();
+    private static final String EVENT_FILE = "calendar_events.json";
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
     public CalendarUI() {
         setTitle("行事曆");
+        loadEvents(); // Load saved events
         initPanel();
         setToday();
         startTimeThread(); // Start time update thread
@@ -39,6 +53,57 @@ public class CalendarUI extends JFrame implements ActionListener {
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+    }
+
+    // Event class to store calendar events
+    public static class CalendarEvent {
+        private String title;
+        private LocalDate date;
+        private String time;
+        private String description;
+        private String googleCalendarId; // For future Google Calendar API integration
+
+        public CalendarEvent(String title, LocalDate date, String time, String description) {
+            this.title = title;
+            this.date = date;
+            this.time = time;
+            this.description = description;
+            this.googleCalendarId = "";
+        }
+
+        public JSONObject toJSON() {
+            JSONObject eventJson = new JSONObject();
+            eventJson.put("title", title);
+            eventJson.put("date", date.format(DATE_FORMAT));
+            eventJson.put("time", time);
+            eventJson.put("description", description);
+            eventJson.put("googleCalendarId", googleCalendarId);
+            return eventJson;
+        }
+
+        public static CalendarEvent fromJSON(JSONObject jsonObject) {
+            String title = (String) jsonObject.get("title");
+            LocalDate date = LocalDate.parse((String) jsonObject.get("date"), DATE_FORMAT);
+            String time = (String) jsonObject.get("time");
+            String description = (String) jsonObject.get("description");
+
+            CalendarEvent event = new CalendarEvent(title, date, time, description);
+            String googleId = (String) jsonObject.get("googleCalendarId");
+            if (googleId != null) {
+                event.googleCalendarId = googleId;
+            }
+            return event;
+        }
+
+        // Getters
+        public String getTitle() { return title; }
+        public LocalDate getDate() { return date; }
+        public String getTime() { return time; }
+        public String getDescription() { return description; }
+        public String getGoogleCalendarId() { return googleCalendarId; }
+
+        // Setters
+        public void setGoogleCalendarId(String id) { this.googleCalendarId = id; }
     }
 
     private void initPanel() {
@@ -160,7 +225,8 @@ public class CalendarUI extends JFrame implements ActionListener {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         if (!labels[index].getText().isEmpty()) {
-                            showEventDialog(Integer.parseInt(labels[index].getText()));
+                            int day = Integer.parseInt(labels[index].getText());
+                            showEventDialog(day);
                         }
                     }
                 });
@@ -191,13 +257,120 @@ public class CalendarUI extends JFrame implements ActionListener {
 
     private void showEventDialog(int day) {
         // Create dialog for adding/editing events
-        JDialog dialog = new JDialog(this, currentYear + "年" + currentMonth + "月" + day + "日 事件", true);
+        LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, day);
+
+        // Get existing events for this day
+        List<CalendarEvent> dayEvents = getEventsForDate(selectedDate);
+
+        JDialog dialog = new JDialog(this, currentYear + "年" + currentMonth + "月" + day + "日 事件管理", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(500, 400);
+        dialog.setLocationRelativeTo(this);
+
+        // Event list
+        DefaultListModel<String> eventListModel = new DefaultListModel<>();
+        if (dayEvents.isEmpty()) {
+            eventListModel.addElement("尚無事件");
+        } else {
+            for (CalendarEvent event : dayEvents) {
+                eventListModel.addElement(event.getTime() + " - " + event.getTitle());
+            }
+        }
+
+        JList<String> eventList = new JList<>(eventListModel);
+        JScrollPane eventScrollPane = new JScrollPane(eventList);
+
+        // Event details panel
+        JPanel eventDetailsPanel = new JPanel(new BorderLayout());
+        eventDetailsPanel.setBorder(BorderFactory.createTitledBorder("事件詳情"));
+
+        JTextArea eventDetails = new JTextArea();
+        eventDetails.setEditable(false);
+        JScrollPane detailsScrollPane = new JScrollPane(eventDetails);
+        eventDetailsPanel.add(detailsScrollPane, BorderLayout.CENTER);
+
+        // Button panel
+        JPanel buttonPanel = new JPanel();
+        JButton addButton = new JButton("新增事件");
+        JButton editButton = new JButton("編輯事件");
+        JButton deleteButton = new JButton("刪除事件");
+        JButton closeButton = new JButton("關閉");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(closeButton);
+
+        // Event list selection listener
+        eventList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedIndex = eventList.getSelectedIndex();
+                if (selectedIndex >= 0 && selectedIndex < dayEvents.size()) {
+                    CalendarEvent selectedEvent = dayEvents.get(selectedIndex);
+                    eventDetails.setText("標題: " + selectedEvent.getTitle() + "\n" +
+                            "時間: " + selectedEvent.getTime() + "\n" +
+                            "描述: " + selectedEvent.getDescription());
+                }
+            }
+        });
+
+        // Add button action
+        addButton.addActionListener(e -> {
+            addNewEvent(selectedDate);
+            dialog.dispose();
+        });
+
+        // Edit button action
+        editButton.addActionListener(e -> {
+            int selectedIndex = eventList.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < dayEvents.size()) {
+                editEvent(dayEvents.get(selectedIndex));
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "請先選擇一個事件");
+            }
+        });
+
+        // Delete button action
+        deleteButton.addActionListener(e -> {
+            int selectedIndex = eventList.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < dayEvents.size()) {
+                if (JOptionPane.showConfirmDialog(dialog,
+                        "確定要刪除事件 \"" + dayEvents.get(selectedIndex).getTitle() + "\"?",
+                        "確認刪除", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    events.remove(dayEvents.get(selectedIndex));
+                    saveEvents();
+                    showCalendar(currentYear, currentMonth);
+                    dialog.dispose();
+                }
+            } else {
+                JOptionPane.showMessageDialog(dialog, "請先選擇一個事件");
+            }
+        });
+
+        // Close button action
+        closeButton.addActionListener(e -> dialog.dispose());
+
+        // Layout
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                eventScrollPane, eventDetailsPanel);
+        splitPane.setDividerLocation(150);
+
+        dialog.add(splitPane, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private void addNewEvent(LocalDate date) {
+        JDialog dialog = new JDialog(this, "新增事件", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
 
         // Event input components
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2));
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         inputPanel.add(new JLabel("事件名稱:"));
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
@@ -207,15 +380,91 @@ public class CalendarUI extends JFrame implements ActionListener {
         inputPanel.add(timeField);
 
         inputPanel.add(new JLabel("備註:"));
-        JTextArea descArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(descArea);
-        inputPanel.add(scrollPane);
+        JTextField descField = new JTextField();
+        inputPanel.add(descField);
 
         // Buttons
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
-            // TODO: Implement saving event to data storage
+            if (titleField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
+                return;
+            }
+
+            CalendarEvent newEvent = new CalendarEvent(
+                    titleField.getText(),
+                    date,
+                    timeField.getText(),
+                    descField.getText()
+            );
+
+            events.add(newEvent);
+            saveEvents();
+            showCalendar(currentYear, currentMonth);
+            dialog.dispose();
+        });
+
+        JButton cancelButton = new JButton("取消");
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private void editEvent(CalendarEvent event) {
+        JDialog dialog = new JDialog(this, "編輯事件", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(400, 300);
+        dialog.setLocationRelativeTo(this);
+
+        // Event input components
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(new JLabel("事件名稱:"));
+        JTextField titleField = new JTextField(event.getTitle());
+        inputPanel.add(titleField);
+
+        inputPanel.add(new JLabel("事件時間:"));
+        JTextField timeField = new JTextField(event.getTime());
+        inputPanel.add(timeField);
+
+        inputPanel.add(new JLabel("備註:"));
+        JTextField descField = new JTextField(event.getDescription());
+        inputPanel.add(descField);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        JButton saveButton = new JButton("保存");
+        saveButton.addActionListener(e -> {
+            if (titleField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
+                return;
+            }
+
+            // Update the event
+            events.remove(event);
+
+            CalendarEvent updatedEvent = new CalendarEvent(
+                    titleField.getText(),
+                    event.getDate(),
+                    timeField.getText(),
+                    descField.getText()
+            );
+
+            // Preserve Google Calendar ID if exists
+            if (!event.getGoogleCalendarId().isEmpty()) {
+                updatedEvent.setGoogleCalendarId(event.getGoogleCalendarId());
+            }
+
+            events.add(updatedEvent);
+            saveEvents();
+            showCalendar(currentYear, currentMonth);
             dialog.dispose();
         });
 
@@ -354,6 +603,7 @@ public class CalendarUI extends JFrame implements ActionListener {
             labels[i].setForeground(Color.black);
             labels[i].setBackground(null);
             labels[i].setOpaque(false);
+            labels[i].setToolTipText(null);
         }
 
         // Set up calendar
@@ -366,7 +616,8 @@ public class CalendarUI extends JFrame implements ActionListener {
 
         // Fill in days
         for (int i = 0; i < daysOfMonth; ++i) {
-            labels[7 + firstWeekOfMonth + i].setText(i + 1 + "");
+            int dayIndex = 7 + firstWeekOfMonth + i;
+            labels[dayIndex].setText(i + 1 + "");
 
             // Highlight today
             Calendar today = Calendar.getInstance();
@@ -374,8 +625,28 @@ public class CalendarUI extends JFrame implements ActionListener {
                     month - 1 == today.get(Calendar.MONTH) &&
                     i + 1 == today.get(Calendar.DAY_OF_MONTH)) {
 
-                labels[7 + firstWeekOfMonth + i].setBackground(new Color(173, 216, 230)); // Light blue
-                labels[7 + firstWeekOfMonth + i].setOpaque(true);
+                labels[dayIndex].setBackground(new Color(173, 216, 230)); // Light blue
+                labels[dayIndex].setOpaque(true);
+            }
+
+            // Check for events on this date
+            LocalDate date = LocalDate.of(year, month, i + 1);
+            List<CalendarEvent> dayEvents = getEventsForDate(date);
+
+            if (!dayEvents.isEmpty()) {
+                // Mark days with events
+                if (labels[dayIndex].getBackground() == null || !labels[dayIndex].isOpaque()) {
+                    labels[dayIndex].setBackground(new Color(230, 230, 250)); // Light lavender
+                    labels[dayIndex].setOpaque(true);
+                }
+
+                // Create tooltip for events
+                StringBuilder tooltip = new StringBuilder("<html>");
+                for (CalendarEvent event : dayEvents) {
+                    tooltip.append(event.getTime()).append(" - ").append(event.getTitle()).append("<br>");
+                }
+                tooltip.append("</html>");
+                labels[dayIndex].setToolTipText(tooltip.toString());
             }
         }
 
@@ -414,6 +685,35 @@ public class CalendarUI extends JFrame implements ActionListener {
             data[i][0] = timeSlots[i];
             for (int j = 1; j < columnNames.length; j++) {
                 data[i][j] = ""; // Empty cells initially
+            }
+        }
+
+        // Fill in events for the week
+        for (int day = 0; day < 7; day++) {
+            LocalDate date = startOfWeek.plusDays(day);
+            List<CalendarEvent> dayEvents = getEventsForDate(date);
+
+            for (CalendarEvent event : dayEvents) {
+                // Parse event time to get hour
+                String time = event.getTime();
+                try {
+                    int hour = Integer.parseInt(time.split(":")[0]);
+                    if (hour >= 0 && hour < 24) {
+                        // Column index is day+1 because column 0 is for time labels
+                        int dayColumn = day + 1;
+                        // Store existing content if any
+                        String existingContent = (String) data[hour][dayColumn];
+
+                        // Append new event (or set if empty)
+                        if (existingContent.isEmpty()) {
+                            data[hour][dayColumn] = event.getTitle();
+                        } else {
+                            data[hour][dayColumn] = existingContent + "\n" + event.getTitle();
+                        }
+                    }
+                } catch (Exception e) {
+                    // Skip invalid time format
+                }
             }
         }
 
@@ -459,16 +759,40 @@ public class CalendarUI extends JFrame implements ActionListener {
         dialog.setLocationRelativeTo(this);
 
         // Event input components
-        JPanel inputPanel = new JPanel(new GridLayout(2, 1));
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         inputPanel.add(new JLabel("事件名稱:"));
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
+
+        inputPanel.add(new JLabel("時間:"));
+        JTextField timeField = new JTextField(time);
+        inputPanel.add(timeField);
+
+        inputPanel.add(new JLabel("備註:"));
+        JTextField descField = new JTextField();
+        inputPanel.add(descField);
 
         // Buttons
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
-            // TODO: Implement saving event to data storage
+            if (titleField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
+                return;
+            }
+
+            CalendarEvent newEvent = new CalendarEvent(
+                    titleField.getText(),
+                    date,
+                    timeField.getText(),
+                    descField.getText()
+            );
+
+            events.add(newEvent);
+            saveEvents();
+            showWeekView(); // Refresh week view
             dialog.dispose();
         });
 
@@ -553,6 +877,22 @@ public class CalendarUI extends JFrame implements ActionListener {
             JLabel dayLabel = new JLabel(String.valueOf(day), SwingConstants.CENTER);
             dayLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 10));
 
+            // Check for events on this date
+            LocalDate date = LocalDate.of(year, month, day);
+            List<CalendarEvent> dayEvents = getEventsForDate(date);
+
+            if (!dayEvents.isEmpty()) {
+                dayLabel.setForeground(Color.BLUE);
+
+                // Create tooltip for events
+                StringBuilder tooltip = new StringBuilder("<html>");
+                for (CalendarEvent event : dayEvents) {
+                    tooltip.append(event.getTime()).append(" - ").append(event.getTitle()).append("<br>");
+                }
+                tooltip.append("</html>");
+                dayLabel.setToolTipText(tooltip.toString());
+            }
+
             // Highlight today
             Calendar today = Calendar.getInstance();
             if (year == today.get(Calendar.YEAR) &&
@@ -589,11 +929,89 @@ public class CalendarUI extends JFrame implements ActionListener {
         panel.add(daysPanel, BorderLayout.CENTER);
 
         // Add major events indicator at the bottom (if any)
-        JLabel eventsLabel = new JLabel("重大事件: 無", SwingConstants.CENTER);
+        int eventCount = countEventsInMonth(year, month);
+        JLabel eventsLabel = new JLabel("事件: " + eventCount, SwingConstants.CENTER);
         eventsLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 10));
         panel.add(eventsLabel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    // JSON Event Storage Methods
+
+    private void loadEvents() {
+        JSONParser parser = new JSONParser();
+        events.clear();
+
+        try {
+            File file = new File(EVENT_FILE);
+            if (!file.exists()) {
+                System.out.println("Event file does not exist yet. Will be created when events are saved.");
+                return;
+            }
+
+            FileReader reader = new FileReader(file);
+            JSONArray jsonEvents = (JSONArray) parser.parse(reader);
+
+            for (Object obj : jsonEvents) {
+                JSONObject jsonEvent = (JSONObject) obj;
+                CalendarEvent event = CalendarEvent.fromJSON(jsonEvent);
+                events.add(event);
+            }
+
+            reader.close();
+            System.out.println("Loaded " + events.size() + " events.");
+
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "無法載入事件資料: " + e.getMessage());
+        }
+    }
+
+    private void saveEvents() {
+        JSONArray jsonEvents = new JSONArray();
+        for (CalendarEvent event : events) {
+            jsonEvents.add(event.toJSON());
+        }
+
+        try {
+            FileWriter writer = new FileWriter(EVENT_FILE);
+            writer.write(jsonEvents.toJSONString());
+            writer.flush();
+            writer.close();
+            System.out.println("Saved " + events.size() + " events.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "無法儲存事件資料: " + e.getMessage());
+        }
+    }
+
+    // Helper methods for event management
+
+    private List<CalendarEvent> getEventsForDate(LocalDate date) {
+        List<CalendarEvent> result = new ArrayList<>();
+        for (CalendarEvent event : events) {
+            if (event.getDate().equals(date)) {
+                result.add(event);
+            }
+        }
+        return result;
+    }
+
+    private int countEventsInMonth(int year, int month) {
+        int count = 0;
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+
+        for (CalendarEvent event : events) {
+            LocalDate eventDate = event.getDate();
+            if ((eventDate.isEqual(startDate) || eventDate.isAfter(startDate)) &&
+                    (eventDate.isEqual(endDate) || eventDate.isBefore(endDate))) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     // Custom renderer for schedule cells (week view)
@@ -614,11 +1032,28 @@ public class CalendarUI extends JFrame implements ActionListener {
                 setBackground(new Color(240, 240, 240));
                 setFont(new Font("微軟正黑體", Font.BOLD, 12));
             } else {
-                setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                // Use light green background for cells with events
+                if (value != null && !value.toString().isEmpty()) {
+                    setBackground(new Color(230, 255, 230));
+                } else {
+                    setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                }
                 setFont(new Font("微軟正黑體", Font.PLAIN, 12));
             }
 
             return this;
         }
+    }
+
+    // Google Calendar API integration preparation
+
+    // This method will be implemented in the future to sync events with Google Calendar
+    private void syncWithGoogleCalendar() {
+        // TODO: Implement Google Calendar API integration
+        // 1. Initialize Google Calendar API client
+        // 2. Authenticate user and get authorization
+        // 3. Sync local events with Google Calendar
+        // 4. Update googleCalendarId for each event
+        JOptionPane.showMessageDialog(this, "Google Calendar 同步功能即將推出");
     }
 }
