@@ -11,6 +11,6 @@ public class Main {
         curriculumWindow.setVisible(true);
         ChatRoom chatWindow = new ChatRoom();
         chatWindow.setVisible(true);
-
+        //測試
     }
 }
