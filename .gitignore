@@ -43,7 +43,7 @@ bin/
 
 .env
 *.env
-credentials.json
-events.json
-calendar_events.json
+src/main/resources/credentials.json
+src/main/resources/events.json
+src/main/resources/calendar_events.json
 StoredCredential
