@@ -25,7 +25,7 @@ public class GoogleCalendarFetcher {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
-    private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+    private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
 
     // 登入資訊
     private static com.google.api.client.auth.oauth2.Credential getCredentials() throws Exception {
