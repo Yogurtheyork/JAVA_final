@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,7 +35,7 @@ public class CalendarUI extends JFrame implements ActionListener {
 
     // Event management
     private List<CalendarEvent> events = new ArrayList<>();
-    private static final String EVENT_FILE = "calendar_events.json";
+    private static final String EVENT_FILE = "src/main/resources/calendar_events.json";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -59,14 +58,16 @@ public class CalendarUI extends JFrame implements ActionListener {
     public static class CalendarEvent {
         private String title;
         private LocalDate date;
-        private String time;
+        private String start;
+        private String end;
         private String description;
         private String googleCalendarId; // For future Google Calendar API integration
 
-        public CalendarEvent(String title, LocalDate date, String time, String description) {
+        public CalendarEvent(String title, LocalDate date, String start, String end, String description) {
             this.title = title;
             this.date = date;
-            this.time = time;
+            this.start = start;
+            this.end = end;
             this.description = description;
             this.googleCalendarId = "";
         }
@@ -75,7 +76,8 @@ public class CalendarUI extends JFrame implements ActionListener {
             JSONObject eventJson = new JSONObject();
             eventJson.put("title", title);
             eventJson.put("date", date.format(DATE_FORMAT));
-            eventJson.put("time", time);
+            eventJson.put("start", start);
+            eventJson.put("end", end);
             eventJson.put("description", description);
             eventJson.put("googleCalendarId", googleCalendarId);
             return eventJson;
@@ -84,10 +86,11 @@ public class CalendarUI extends JFrame implements ActionListener {
         public static CalendarEvent fromJSON(JSONObject jsonObject) {
             String title = (String) jsonObject.get("title");
             LocalDate date = LocalDate.parse((String) jsonObject.get("date"), DATE_FORMAT);
-            String time = (String) jsonObject.get("time");
+            String start = (String) jsonObject.get("start");
+            String end = (String) jsonObject.get("end");
             String description = (String) jsonObject.get("description");
 
-            CalendarEvent event = new CalendarEvent(title, date, time, description);
+            CalendarEvent event = new CalendarEvent(title, date, start, end, description);
             String googleId = (String) jsonObject.get("googleCalendarId");
             if (googleId != null) {
                 event.googleCalendarId = googleId;
@@ -98,7 +101,8 @@ public class CalendarUI extends JFrame implements ActionListener {
         // Getters
         public String getTitle() { return title; }
         public LocalDate getDate() { return date; }
-        public String getTime() { return time; }
+        public String getStart() { return start; }
+        public String getEnd() { return end; }
         public String getDescription() { return description; }
         public String getGoogleCalendarId() { return googleCalendarId; }
 
@@ -273,7 +277,7 @@ public class CalendarUI extends JFrame implements ActionListener {
             eventListModel.addElement("尚無事件");
         } else {
             for (CalendarEvent event : dayEvents) {
-                eventListModel.addElement(event.getTime() + " - " + event.getTitle());
+                eventListModel.addElement(event.getEnd() + " - " + event.getTitle());
             }
         }
 
@@ -308,7 +312,7 @@ public class CalendarUI extends JFrame implements ActionListener {
                 if (selectedIndex >= 0 && selectedIndex < dayEvents.size()) {
                     CalendarEvent selectedEvent = dayEvents.get(selectedIndex);
                     eventDetails.setText("標題: " + selectedEvent.getTitle() + "\n" +
-                            "時間: " + selectedEvent.getTime() + "\n" +
+                            "時間: " + selectedEvent.getEnd() + "\n" +
                             "描述: " + selectedEvent.getDescription());
                 }
             }
@@ -375,9 +379,13 @@ public class CalendarUI extends JFrame implements ActionListener {
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
 
-        inputPanel.add(new JLabel("事件時間:"));
-        JTextField timeField = new JTextField("HH:MM");
-        inputPanel.add(timeField);
+        inputPanel.add(new JLabel("事件開始:"));
+        JTextField timeFieldStart = new JTextField("HH:MM");
+        inputPanel.add(timeFieldStart);
+
+        inputPanel.add(new JLabel("事件結束:"));
+        JTextField timeFieldEnd = new JTextField("HH:MM");
+        inputPanel.add(timeFieldEnd);
 
         inputPanel.add(new JLabel("備註:"));
         JTextField descField = new JTextField();
@@ -395,7 +403,8 @@ public class CalendarUI extends JFrame implements ActionListener {
             CalendarEvent newEvent = new CalendarEvent(
                     titleField.getText(),
                     date,
-                    timeField.getText(),
+                    timeFieldStart.getText(),
+                    timeFieldEnd.getText(),
                     descField.getText()
             );
 
@@ -430,9 +439,13 @@ public class CalendarUI extends JFrame implements ActionListener {
         JTextField titleField = new JTextField(event.getTitle());
         inputPanel.add(titleField);
 
-        inputPanel.add(new JLabel("事件時間:"));
-        JTextField timeField = new JTextField(event.getTime());
-        inputPanel.add(timeField);
+        inputPanel.add(new JLabel("事件開始時間:"));
+        JTextField timeFieldStart = new JTextField("HH:MM");
+        inputPanel.add(timeFieldStart);
+
+        inputPanel.add(new JLabel("事件結束時間:"));
+        JTextField timeFieldEnd = new JTextField("HH:MM");
+        inputPanel.add(timeFieldEnd);
 
         inputPanel.add(new JLabel("備註:"));
         JTextField descField = new JTextField(event.getDescription());
@@ -453,7 +466,8 @@ public class CalendarUI extends JFrame implements ActionListener {
             CalendarEvent updatedEvent = new CalendarEvent(
                     titleField.getText(),
                     event.getDate(),
-                    timeField.getText(),
+                    timeFieldStart.getText(),
+                    timeFieldEnd.getText(),
                     descField.getText()
             );
 
@@ -643,7 +657,7 @@ public class CalendarUI extends JFrame implements ActionListener {
                 // Create tooltip for events
                 StringBuilder tooltip = new StringBuilder("<html>");
                 for (CalendarEvent event : dayEvents) {
-                    tooltip.append(event.getTime()).append(" - ").append(event.getTitle()).append("<br>");
+                    tooltip.append(event.getEnd()).append(" - ").append(event.getTitle()).append("<br>");
                 }
                 tooltip.append("</html>");
                 labels[dayIndex].setToolTipText(tooltip.toString());
@@ -695,7 +709,7 @@ public class CalendarUI extends JFrame implements ActionListener {
 
             for (CalendarEvent event : dayEvents) {
                 // Parse event time to get hour
-                String time = event.getTime();
+                String time = event.getEnd();
                 try {
                     int hour = Integer.parseInt(time.split(":")[0]);
                     if (hour >= 0 && hour < 24) {
@@ -766,9 +780,13 @@ public class CalendarUI extends JFrame implements ActionListener {
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
 
-        inputPanel.add(new JLabel("時間:"));
-        JTextField timeField = new JTextField(time);
-        inputPanel.add(timeField);
+        inputPanel.add(new JLabel("開始時間:"));
+        JTextField timeFieldStart = new JTextField(time);
+        inputPanel.add(timeFieldStart);
+
+        inputPanel.add(new JLabel("結束時間:"));
+        JTextField timeFieldEnd = new JTextField(time);
+        inputPanel.add(timeFieldEnd);
 
         inputPanel.add(new JLabel("備註:"));
         JTextField descField = new JTextField();
@@ -786,7 +804,8 @@ public class CalendarUI extends JFrame implements ActionListener {
             CalendarEvent newEvent = new CalendarEvent(
                     titleField.getText(),
                     date,
-                    timeField.getText(),
+                    timeFieldStart.getText(),
+                    timeFieldEnd.getText(),
                     descField.getText()
             );
 
@@ -887,7 +906,7 @@ public class CalendarUI extends JFrame implements ActionListener {
                 // Create tooltip for events
                 StringBuilder tooltip = new StringBuilder("<html>");
                 for (CalendarEvent event : dayEvents) {
-                    tooltip.append(event.getTime()).append(" - ").append(event.getTitle()).append("<br>");
+                    tooltip.append(event.getEnd()).append(" - ").append(event.getTitle()).append("<br>");
                 }
                 tooltip.append("</html>");
                 dayLabel.setToolTipText(tooltip.toString());
@@ -1045,9 +1064,6 @@ public class CalendarUI extends JFrame implements ActionListener {
         }
     }
 
-    // Google Calendar API integration preparation
-
-    // This method will be implemented in the future to sync events with Google Calendar
     private void syncWithGoogleCalendar() {
         // TODO: Implement Google Calendar API integration
         // 1. Initialize Google Calendar API client
