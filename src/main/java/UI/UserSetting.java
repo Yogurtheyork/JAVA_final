@@ -1,5 +1,7 @@
 package UI;
 
+import DataStructures.Setting;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -8,19 +10,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-
-// 使用者設定資料結構
-class Setting {
-    String language;
-    String fontSize;
-    boolean autoStart;
-
-    public Setting(String language, String fontSize, boolean autoStart) {
-        this.language = language;
-        this.fontSize = fontSize;
-        this.autoStart = autoStart;
-    }
-}
 
 public class UserSetting extends JFrame {
     private JComboBox<String> languageComboBox;
