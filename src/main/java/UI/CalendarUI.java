@@ -25,7 +25,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CalendarUI extends JPanel{
+public class CalendarUI extends JPanel implements ActionListener{
 
     private static JLabel TaiwanTime;
 
@@ -268,7 +268,7 @@ public class CalendarUI extends JPanel{
         // Get existing events for this day
         List<CalendarEvent> dayEvents = getEventsForDate(selectedDate);
 
-        JDialog dialog = new JDialog(this, currentYear + "年" + currentMonth + "月" + day + "日 事件管理", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), currentYear + "年" + currentMonth + "月" + day + "日 事件管理", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(500, 400);
         dialog.setLocationRelativeTo(this);
@@ -368,7 +368,7 @@ public class CalendarUI extends JPanel{
     }
 
     private void addNewEvent(LocalDate date) {
-        JDialog dialog = new JDialog(this, "新增事件", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "新增事件", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
@@ -428,7 +428,7 @@ public class CalendarUI extends JPanel{
     }
 
     private void editEvent(CalendarEvent event) {
-        JDialog dialog = new JDialog(this, "編輯事件", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "編輯事件", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
@@ -755,7 +755,7 @@ public class CalendarUI extends JPanel{
     }
 
     private void showWeekEventDialog(LocalDate date, String time) {
-        JDialog dialog = new JDialog(this, date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) + " " + time + " 事件", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) + " " + time + " 事件", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
