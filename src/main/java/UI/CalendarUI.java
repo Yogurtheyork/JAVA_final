@@ -59,6 +59,8 @@ public class CalendarUI extends JPanel implements ActionListener{
     public CalendarUI() {
         initComponents();
         setupUI();
+        loadEvents();
+        setToday();
     }
 
     private void initComponents() {
@@ -79,20 +81,20 @@ public class CalendarUI extends JPanel implements ActionListener{
         // Initialize view buttons
         btnWeek = new JButton("週");
         btnWeek.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnWeek.addActionListener(controller);
+        btnWeek.addActionListener(this);
 
         btnMonth = new JButton("月");
         btnMonth.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnMonth.addActionListener(controller);
+        btnMonth.addActionListener(this);
 
         btnYear = new JButton("年");
         btnYear.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnYear.addActionListener(controller);
+        btnYear.addActionListener(this);
 
         toNow = new JButton("今天");
         toNow.setOpaque(false);
         toNow.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        toNow.addActionListener(controller);
+        toNow.addActionListener(this);
 
         // Search panel
         JPanel jp_search = new JPanel();
@@ -117,7 +119,7 @@ public class CalendarUI extends JPanel implements ActionListener{
         btn_lastMonth.setBackground(Color.darkGray);
         btn_lastMonth.setForeground(Color.WHITE);
         btn_lastMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
-        btn_lastMonth.addActionListener(controller);
+        btn_lastMonth.addActionListener(this);
 
         btn_nextMonth = new JButton(">>");
         btn_nextMonth.setBorder(null);
@@ -125,12 +127,16 @@ public class CalendarUI extends JPanel implements ActionListener{
         btn_nextMonth.setBackground(Color.darkGray);
         btn_nextMonth.setForeground(Color.WHITE);
         btn_nextMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
-        btn_nextMonth.addActionListener(controller);
+        btn_nextMonth.addActionListener(this);
+
+        // 這裡新增自己的 calendarPanel！
+        calendarPanel = new JPanel(new BorderLayout());
+        calendarPanel.setOpaque(false);
 
         // Add components to main frame
         this.setBackground(new Color(202, 199, 198));
         this.add(jp_top, BorderLayout.NORTH);
-        this.add(calendarView.getCalendarPanel(), BorderLayout.CENTER);
+        this.add(calendarPanel, BorderLayout.CENTER);
         this.add(btn_lastMonth, BorderLayout.WEST);
         this.add(btn_nextMonth, BorderLayout.EAST);
 
@@ -496,15 +502,18 @@ public class CalendarUI extends JPanel implements ActionListener{
     }
 
     private void setToday() {
-        int year, month, day;
-        year = LocalDate.now().getYear();
-        month = LocalDate.now().getMonthValue();
-        day = LocalDate.now().getDayOfMonth();
+        int year = LocalDate.now().getYear();
+        int month = LocalDate.now().getMonthValue();
+        int day = LocalDate.now().getDayOfMonth();
         currentYear = year;
         currentMonth = month;
         currentDay = day;
+
+        currentView = ViewMode.MONTH; // ★★強制切回月視圖★★
+        initializeMonthView(); // ★ 初始化 labels！
         showCalendar(year, month);
     }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -1050,14 +1059,5 @@ public class CalendarUI extends JPanel implements ActionListener{
 
             return this;
         }
-    }
-
-    private void syncWithGoogleCalendar() {
-        // TODO: Implement Google Calendar API integration
-        // 1. Initialize Google Calendar API client
-        // 2. Authenticate user and get authorization
-        // 3. Sync local events with Google Calendar
-        // 4. Update googleCalendarId for each event
-        JOptionPane.showMessageDialog(this, "Google Calendar 同步功能即將推出");
     }
 }
