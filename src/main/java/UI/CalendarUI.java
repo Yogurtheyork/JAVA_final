@@ -1,5 +1,9 @@
 package UI;
 
+import UI.controller.CalendarController;
+import UI.service.EventService;
+import UI.view.CalendarView;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -22,29 +26,114 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class CalendarUI extends JFrame implements ActionListener {
+
     private static JLabel TaiwanTime;
+
     private JButton btnWeek, btnMonth, btnYear;
-    private JButton toNow;
     private JButton btn_lastMonth, btn_nextMonth;
+    private JButton toNow;
+
     private JLabel[] labels;
+
     private int currentYear, currentMonth, currentDay;
-    private JPanel calendarPanel; // Main panel for different views
-    private JLabel monthTitleLabel; // Store reference to month title label
+
+    // Main panel for different views
+    private JPanel calendarPanel;
+
+    // Store reference to month title label
+    private JLabel monthTitleLabel;
+
     private enum ViewMode {WEEK, MONTH, YEAR}
     private ViewMode currentView = ViewMode.MONTH; // Default view
 
     // Event management
-    private List<CalendarEvent> events = new ArrayList<>();
+    private final List<CalendarEvent> events = new ArrayList<>();
     private static final String EVENT_FILE = "src/main/resources/calendar_events.json";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
+    private CalendarView calendarView;
+    private CalendarController controller;
+
+    //constructor
     public CalendarUI() {
         setTitle("行事曆");
-        loadEvents(); // Load saved events
-        initPanel();
-        setToday();
-        startTimeThread(); // Start time update thread
+        initComponents();
+        setupUI();
+    }
+
+    private void initComponents() {
+        EventService eventService = new EventService();
+        controller = new CalendarController(eventService, null); // Initialize controller first
+        calendarView = new CalendarView(eventService, controller); // Then create view with controller
+        controller.setView(calendarView); // Set the view in controller
+    }
+
+    private void setupUI() {
+        setLayout(new BorderLayout());
+
+        // Initialize the clock label
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        TaiwanTime = new JLabel(df.format(new Date()), JLabel.CENTER);
+        TaiwanTime.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+
+        // Initialize view buttons
+        btnWeek = new JButton("週");
+        btnWeek.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        btnWeek.addActionListener(controller);
+
+        btnMonth = new JButton("月");
+        btnMonth.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        btnMonth.addActionListener(controller);
+
+        btnYear = new JButton("年");
+        btnYear.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        btnYear.addActionListener(controller);
+
+        toNow = new JButton("今天");
+        toNow.setOpaque(false);
+        toNow.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        toNow.addActionListener(controller);
+
+        // Search panel
+        JPanel jp_search = new JPanel();
+        jp_search.setOpaque(false);
+        jp_search.setBorder(new javax.swing.border.TitledBorder("查詢日期"));
+        jp_search.add(btnYear);
+        jp_search.add(btnMonth);
+        jp_search.add(btnWeek);
+        jp_search.add(new JLabel("         "));
+        jp_search.add(toNow);
+
+        // Top panel layout
+        JPanel jp_top = new JPanel(new BorderLayout());
+        jp_top.setOpaque(false);
+        jp_top.add(TaiwanTime, BorderLayout.NORTH);
+        jp_top.add(jp_search, BorderLayout.CENTER);
+
+        // Navigation buttons
+        btn_lastMonth = new JButton("<<");
+        btn_lastMonth.setBorder(null);
+        btn_lastMonth.setOpaque(false);
+        btn_lastMonth.setBackground(Color.darkGray);
+        btn_lastMonth.setForeground(Color.WHITE);
+        btn_lastMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
+        btn_lastMonth.addActionListener(controller);
+
+        btn_nextMonth = new JButton(">>");
+        btn_nextMonth.setBorder(null);
+        btn_nextMonth.setOpaque(false);
+        btn_nextMonth.setBackground(Color.darkGray);
+        btn_nextMonth.setForeground(Color.WHITE);
+        btn_nextMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
+        btn_nextMonth.addActionListener(controller);
+
+        // Add components to main frame
+        this.setBackground(new Color(202, 199, 198));
+        this.add(jp_top, BorderLayout.NORTH);
+        this.add(calendarView.getCalendarPanel(), BorderLayout.CENTER);
+        this.add(btn_lastMonth, BorderLayout.WEST);
+        this.add(btn_nextMonth, BorderLayout.EAST);
 
         // Set window properties
         setVisible(true);
@@ -52,6 +141,20 @@ public class CalendarUI extends JFrame implements ActionListener {
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        // Start time update thread
+        startTimeThread();
+    }
+
+    private void startTimeThread() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                TaiwanTime.setText(df.format(new Date()));
+            }
+        }, 0, 1000);
     }
 
     // Event class to store calendar events
@@ -108,103 +211,6 @@ public class CalendarUI extends JFrame implements ActionListener {
 
         // Setters
         public void setGoogleCalendarId(String id) { this.googleCalendarId = id; }
-    }
-
-    private void initPanel() {
-        // Create main layout
-        setLayout(new BorderLayout());
-
-        // Initialize the clock label
-        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-        TaiwanTime = new JLabel(df.format(new Date()), JLabel.CENTER);
-        TaiwanTime.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-
-        // Initialize view buttons
-        btnWeek = new JButton("週");
-        btnWeek.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnWeek.addActionListener(this);
-
-        btnMonth = new JButton("月");
-        btnMonth.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnMonth.addActionListener(this);
-
-        btnYear = new JButton("年");
-        btnYear.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnYear.addActionListener(this);
-
-        toNow = new JButton("今天");
-        toNow.setOpaque(false);
-        toNow.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        toNow.addActionListener(this);
-
-        // Search panel
-        JPanel jp_search = new JPanel();
-        jp_search.setOpaque(false);
-        jp_search.setBorder(new TitledBorder("查詢日期"));
-        jp_search.add(btnYear);
-        jp_search.add(btnMonth);
-        jp_search.add(btnWeek);
-        jp_search.add(new JLabel("         "));
-        jp_search.add(toNow);
-
-        // Top panel layout
-        JPanel jp_top = new JPanel(new BorderLayout());
-        jp_top.setOpaque(false);
-        jp_top.add(TaiwanTime, BorderLayout.NORTH);
-        jp_top.add(jp_search, BorderLayout.CENTER);
-
-        // Initialize calendar panel for different views
-        calendarPanel = new JPanel(new BorderLayout());
-        calendarPanel.setOpaque(false);
-
-        // Create monthly view (default)
-        initializeMonthView();
-
-        // Navigation buttons
-        btn_lastMonth = new JButton("<<");
-        btn_lastMonth.setBorder(null);
-        btn_lastMonth.setOpaque(false);
-        btn_lastMonth.setBackground(Color.darkGray);
-        btn_lastMonth.setForeground(Color.WHITE);
-        btn_lastMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
-        btn_lastMonth.addActionListener(this);
-        btn_lastMonth.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn_lastMonth.setForeground(Color.green);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn_lastMonth.setForeground(Color.white);
-            }
-        });
-
-        btn_nextMonth = new JButton(">>");
-        btn_nextMonth.setBorder(null);
-        btn_nextMonth.setOpaque(false);
-        btn_nextMonth.setBackground(Color.darkGray);
-        btn_nextMonth.setForeground(Color.WHITE);
-        btn_nextMonth.setFont(new Font("微軟正黑體", Font.PLAIN, 30));
-        btn_nextMonth.addActionListener(this);
-        btn_nextMonth.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn_nextMonth.setForeground(Color.green);
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn_nextMonth.setForeground(Color.white);
-            }
-        });
-
-        // Add components to main frame
-        this.setBackground(new Color(202, 199, 198));
-        this.add(jp_top, BorderLayout.NORTH);
-        this.add(calendarPanel, BorderLayout.CENTER);
-        this.add(btn_lastMonth, BorderLayout.WEST);
-        this.add(btn_nextMonth, BorderLayout.EAST);
-        this.validate();
     }
 
     private void initializeMonthView() {
@@ -502,20 +508,6 @@ public class CalendarUI extends JFrame implements ActionListener {
         currentMonth = month;
         currentDay = day;
         showCalendar(year, month);
-    }
-
-    // Start a thread to update time display
-    private void startTimeThread() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                    TaiwanTime.setText(df.format(new Date()));
-                });
-            }
-        }, 0, 1000); // Update every second
     }
 
     @Override
