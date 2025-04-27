@@ -11,35 +11,35 @@ import java.io.IOException;
 import java.util.Scanner;
 
 
-public class ChatRoom extends JFrame {
-    private JTextField userQueryField;
-    private JTextArea chatArea;
-    private JButton sendButton;
+public class ChatRoom extends JPanel {
+    private final JTextField userQueryField;
+    private final JTextArea chatArea;
+    private final JButton sendButton;
 
     public ChatRoom(){
-        // Set up the main frame
-        setTitle("Calendar Assistant");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 600);
-        setLocationRelativeTo(null);
+        // Set up the main panel
+        setPreferredSize(new Dimension(300, 600));
+        setLayout(new BorderLayout());
 
         // Create components
         userQueryField = new JTextField();
         chatArea = new JTextArea();
-        userQueryField.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 16)); // 輸入欄字體
-        chatArea.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 16));       // 聊天區字體
+        userQueryField.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14)); // 輸入欄字體
+        chatArea.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14));       // 聊天區字體
         sendButton = new JButton("Send");
-        sendButton.setPreferredSize(new Dimension(100, 40));       // 調整按鈕大小
-        sendButton.setFont(new Font("Microsoft JhengHei", Font.BOLD, 16));      // 調整按鈕字體
+        sendButton.setPreferredSize(new Dimension(80, 30));       // 調整按鈕大小
+        sendButton.setFont(new Font("Microsoft JhengHei", Font.BOLD, 14));      // 調整按鈕字體
 
         // Configure chat area
         chatArea.setEditable(false);
         chatArea.setLineWrap(true);
         chatArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(chatArea);
+        scrollPane.setPreferredSize(new Dimension(300, 500));
 
         // Create panels
         JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.setPreferredSize(new Dimension(300, 40));
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         // Add components to input panel
@@ -87,7 +87,6 @@ public class ChatRoom extends JFrame {
 
         // Add action listener to input field (Enter key)
         userQueryField.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendButton.doClick();

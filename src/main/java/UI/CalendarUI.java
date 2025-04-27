@@ -25,7 +25,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CalendarUI extends JFrame implements ActionListener {
+public class CalendarUI extends JPanel{
 
     private static JLabel TaiwanTime;
 
@@ -57,7 +57,6 @@ public class CalendarUI extends JFrame implements ActionListener {
 
     //constructor
     public CalendarUI() {
-        setTitle("行事曆");
         initComponents();
         setupUI();
     }
@@ -137,10 +136,7 @@ public class CalendarUI extends JFrame implements ActionListener {
 
         // Set window properties
         setVisible(true);
-        setResizable(false);
-        setSize(1200, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setSize(500, 500);
 
         // Start time update thread
         startTimeThread();
@@ -236,7 +232,7 @@ public class CalendarUI extends JFrame implements ActionListener {
                     public void mouseClicked(MouseEvent e) {
                         if (!labels[index].getText().isEmpty()) {
                             int day = Integer.parseInt(labels[index].getText());
-                            showEventDialog(day);
+                            //showEventDialog(day);
                         }
                     }
                 });
