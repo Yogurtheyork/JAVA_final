@@ -13,6 +13,14 @@ public class ChatConfig {
     private static final String CONFIG_FILE = "src/main/resources/config.json";
     private static final String SETTINGS_FILE = "src/main/resources/userSetting.json";
     private static final Config DEFAULT_CONFIG = new Config("zh");
+    // TODO: 將語言轉換寫進json檔
+    private static final String ChatRoomChinese =
+            "你是一個[智慧行事曆管理與學習助理]，請協助我[安排行程]及[學習]，[不提供其他功能]。" +
+            "收到請回答\"您好我是您的智慧助理，我可以如何幫助您?\"";
+    private static final String ChatRoomEnglish =
+            "You are a [Smart Calendar Management and Learning Assistant], please assist me with [Scheduling] and [Learning], [No other functions]." +
+            "If you receive this, please reply \"Hello, I am your smart assistant, how can I help you?\"";
+
     // 設定檔內容
     public static class Config {
         public String languagePreference;
@@ -39,12 +47,12 @@ public class ChatConfig {
         try (FileReader reader = new FileReader(SETTINGS_FILE)) {
             Setting setting = gson.fromJson(reader, Setting.class);
             if (setting == null) {
-                System.err.println("設定檔為空，使用預設設定");
+                System.err.println("Setting is null, using default setting");
                 return DEFAULT_CONFIG.languagePreference;
             }
             return setting.language;
         } catch (IOException e) {
-            System.err.println("找不到設定檔或讀取錯誤，使用預設設定");
+            System.err.println("Could not read settings file: " + e.getMessage());
             return DEFAULT_CONFIG.languagePreference;
         }
     }
@@ -52,17 +60,11 @@ public class ChatConfig {
     public String ChatPrompt (){
         String prompt;
         if (loadLanguage().equals("zh")) {
-            // 繁體中文提示
-            prompt = "你是一個[智慧行事曆管理與學習助理]，請協助我[安排行程]及[學習]，[不提供其他功能]。\n" +
-                    "收到請回答\"您好我是您的智慧助理，我可以如何幫助您?\"";
+            prompt = ChatRoomChinese;
         } else if(loadLanguage().equals("en")) {
-            // 英文提示
-            prompt = "You are a [Smart Calendar Management and Learning Assistant], please assist me with [Scheduling] and [Learning], [No other functions].\n" +
-                    "If you receive this, please reply \"Hello, I am your smart assistant, how can I help you?\"";
+            prompt = ChatRoomEnglish;
         } else {
-            // 英文提示
-            prompt = "You are a [Smart Calendar Management and Learning Assistant], please assist me with [Scheduling] and [Learning], [No other functions].\n" +
-                    "If you receive this, please reply \"Hello, I am your smart assistant, how can I help you?\"";
+            prompt = ChatRoomEnglish;
         }
         return prompt;
     }
