@@ -1,7 +1,8 @@
 package UI;
 
+import UI.CalendarComponents.Calender.Header;
+
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,8 +31,8 @@ public class activateUI {
         });
 
         // Calendar panel initialization
-        CalendarUI calendarUI = new CalendarUI();
-        calenderPanel.add(calendarUI, BorderLayout.CENTER);
+        Header header = new Header();
+        calenderPanel.add(header);
 
         // MainFrame initialization
         mainFrame.setSize(1200, 800);
