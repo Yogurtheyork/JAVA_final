@@ -66,7 +66,7 @@ public class ChatConfig {
         } else {
             prompt = ChatRoomEnglish;
         }
-        return prompt;
+        return prompt+"\n";
     }
 
 //    // 測試主程式

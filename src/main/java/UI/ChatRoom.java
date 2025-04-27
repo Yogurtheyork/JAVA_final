@@ -66,8 +66,13 @@ public class ChatRoom extends JPanel {
         // Add main panel to frame
         add(mainPanel);
 
-        chatConfig = new ChatConfig();
-        chatArea.append(chatConfig.ChatPrompt()+"\n");
+        ChatConfig chatConfig = new ChatConfig();
+        String config = chatConfig.ChatPrompt();
+        try {
+            chatArea.append("Assistant: " + chatGPT.chat(config));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         // Add action listener to send button
         sendButton.addActionListener(new ActionListener() {
             @Override
@@ -75,13 +80,13 @@ public class ChatRoom extends JPanel {
                 String query = userQueryField.getText();
                 if (!query.isEmpty()) {
                     // Add user message to chat area
-                    chatArea.append("你: " + query + "\n");
+                    chatArea.append("You: " + query + "\n");
                     // Clear input field
                     userQueryField.setText("");
                     //接收回應
                     try {
                         String response = chatGPT.chat(query);
-                        chatArea.append("助理: " + response);
+                        chatArea.append("Assistant: " + response);
                     } catch (IOException ev) {
                         chatArea.append("Error: " + ev.getMessage());
                     }

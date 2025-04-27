@@ -17,8 +17,14 @@ public class ChatBotExample {
         ChatGPT chatGPT = new ChatGPT(apiKey);
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("ChatGPT Bot (Type 'exit' to quit)");
-        System.out.println("--------------------------------");
+        ChatConfig chatConfig = new ChatConfig();
+        String config = chatConfig.ChatPrompt();
+        try {
+            System.out.println("Bot: " + chatGPT.chat(config));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         while (true) {
             System.out.print("You: ");
