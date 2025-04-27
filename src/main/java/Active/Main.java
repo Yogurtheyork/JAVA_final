@@ -1,33 +1,44 @@
-package Active;
+package UI;
 
-import UI.*;
-import UI.service.EventService;
-import UI.controller.CalendarController;
-import UI.view.CalendarView;
-
-import javax.swing.JFrame;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Main {
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Calendar");
-        frame.setSize(1000,1000);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        // Initialize the calendar components
-        EventService eventService = new EventService();
-        CalendarController controller = new CalendarController(eventService, null);
-        CalendarView view = new CalendarView(eventService, controller);
-        controller.setView(view);
-        
-        // Create and show the CalendarUI
-        CalendarUI calendarUI = new CalendarUI();
-        calendarUI.setVisible(true);
 
-        frame.add(calendarUI);
-        //Curriculum Curriculum = new Curriculum();
-        //Curriculum.setVisible(true);
-//        ChatRoom chatWindow = new ChatRoom();
-//        chatWindow.setVisible(true);
+    public static final JFrame mainFrame = new JFrame();
+    public static final JPanel calenderPanel = new JPanel(new BorderLayout());
+    public static final JPanel chatRoomPanel = new JPanel(new BorderLayout());
+
+    public static void main(String[] args) {
+
+        // ChatRoom panel initialization
+        ChatRoom chatRoom = new ChatRoom();
+        JButton chatRoomButton = new JButton("Toggle Chat");
+        chatRoomButton.setPreferredSize(new Dimension(100, 30));
+        chatRoomPanel.add(chatRoomButton, BorderLayout.SOUTH);
+        chatRoomPanel.add(chatRoom, BorderLayout.CENTER);
+        chatRoomPanel.setPreferredSize(new Dimension(300, 600));
+        chatRoomPanel.setVisible(true);
+        chatRoomButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chatRoom.setVisible(!chatRoom.isVisible());
+            }
+        });
+
+        CalendarUI calendarUI = new CalendarUI();
+        mainFrame.add(calendarUI, BorderLayout.CENTER);
+
+
+        // MainFrame initialization
+        mainFrame.setSize(1200, 800);
+        mainFrame.setMinimumSize(new Dimension(800, 600));
+        //mainFrame.add(calenderPanel, BorderLayout.CENTER);
+        mainFrame.add(calenderPanel, BorderLayout.CENTER);
+        mainFrame.add(chatRoomPanel, BorderLayout.EAST);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setVisible(true);
     }
 }
