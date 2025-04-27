@@ -10,11 +10,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
 import java.util.Scanner;
 
+import ChatGPT.ChatConfig;
 
 public class ChatRoom extends JPanel {
     private final JTextField userQueryField;
     private final JTextArea chatArea;
     private final JButton sendButton;
+    private ChatConfig chatConfig;
 
     public ChatRoom(){
         // Set up the main panel
@@ -63,7 +65,9 @@ public class ChatRoom extends JPanel {
 
         // Add main panel to frame
         add(mainPanel);
-        chatArea.append("您好，我可以如何幫助您?\n");
+
+        chatConfig = new ChatConfig();
+        chatArea.append(chatConfig.ChatPrompt()+"\n");
         // Add action listener to send button
         sendButton.addActionListener(new ActionListener() {
             @Override

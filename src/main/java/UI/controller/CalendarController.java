@@ -2,7 +2,7 @@ package UI.controller;
 
 import UI.model.CalendarEvent;
 import UI.service.EventService;
-import UI.view.CalendarView;
+import UI.CalendarComponents.Calender.CalendarView;
 
 import javax.swing.*;
 import java.awt.*;
