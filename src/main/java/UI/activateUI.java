@@ -1,6 +1,7 @@
 package UI;
 
-import UI.CalendarComponents.Calender.Header;
+import UI.controller.CalendarController;
+import UI.service.EventService;
 
 import javax.swing.*;
 import java.awt.*;

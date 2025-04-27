@@ -7,7 +7,6 @@ import UI.view.CalendarView;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +24,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CalendarUI extends JPanel implements ActionListener{
+public class CalendarUI extends JPanel implements ActionListener {
 
     private static JLabel TaiwanTime;
 
