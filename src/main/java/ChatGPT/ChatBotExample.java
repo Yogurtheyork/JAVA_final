@@ -3,6 +3,7 @@ package ChatGPT;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
 import java.util.Scanner;
+import ChatGPT.Prompt.ChatPrompt;
 
 public class ChatBotExample {
     public static void main(String[] args) {
@@ -17,8 +18,8 @@ public class ChatBotExample {
         ChatGPT chatGPT = new ChatGPT(apiKey);
         Scanner scanner = new Scanner(System.in);
 
-        ChatConfig chatConfig = new ChatConfig();
-        String config = chatConfig.ChatPrompt();
+        ChatPrompt chatPrompt = new ChatPrompt();
+        String config = chatPrompt.strPrompt();
         try {
             System.out.println("Bot: " + chatGPT.chat(config));
         } catch (IOException e) {

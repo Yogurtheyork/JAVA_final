@@ -6,17 +6,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 //GPT API
 import ChatGPT.ChatGPT;
+import ChatGPT.Prompt.ChatPrompt;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
 import java.util.Scanner;
 
-import ChatGPT.ChatConfig;
+import ChatGPT.Prompt.ChatPrompt;
 
 public class ChatRoom extends JPanel {
     private final JTextField userQueryField;
     private final JTextArea chatArea;
     private final JButton sendButton;
-    private ChatConfig chatConfig;
 
     public ChatRoom(){
         // Set up the main panel
@@ -66,8 +66,8 @@ public class ChatRoom extends JPanel {
         // Add main panel to frame
         add(mainPanel);
 
-        ChatConfig chatConfig = new ChatConfig();
-        String config = chatConfig.ChatPrompt();
+        ChatPrompt chatPrompt = new ChatPrompt();
+        String config = chatPrompt.strPrompt();
         try {
             chatArea.append("Assistant: " + chatGPT.chat(config));
         } catch (IOException e) {
