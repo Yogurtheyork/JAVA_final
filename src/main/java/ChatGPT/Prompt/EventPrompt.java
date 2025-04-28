@@ -1,4 +1,57 @@
 package ChatGPT.Prompt;
 
+import Language.LanguageConfig;
+
 public class EventPrompt {
+    // TODO: 將語言轉換寫進json檔
+    private static final String ChineseStart =
+            "請作為一個[學習助理]協助我安排行程，並提供我[行程名稱]、[開始時間]、[結束時間]、[地點]、[備註]等資訊。" +
+                    "以下json格式資料是[現有的行程]，";
+    private static final String ChineseLearning = "";
+    private static final String ChineseReview = "";
+    private static final String ChineseEnd = "";
+    private static final String EnglishStart =
+            "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [Event Name], [Start Time], [End Time], [Location], and [Notes]." +
+                    "The following json format data is [existing schedule],";
+    private static final String EnglishLearning = "";
+    private static final String EnglishReview = "";
+    private static final String EnglishEnd = "";
+
+    //讓AI安排複習時間
+    public String ReviewPrompt (){
+        String prompt;
+        if (LanguageConfig.loadLanguage().equals("zh")) {
+            prompt = ChineseStart+
+                    ChineseReview+
+                    ChineseEnd;
+        } else if(LanguageConfig.loadLanguage().equals("en")) {
+            prompt = EnglishStart+
+                    EnglishReview+
+                    EnglishEnd;
+        } else {
+            prompt = EnglishStart+
+                    EnglishReview+
+                    EnglishEnd;
+        }
+        return prompt+"\n";
+    }
+
+    //讓AI安排學習計畫
+    public String LearningPrompt (){
+        String prompt;
+        if (LanguageConfig.loadLanguage().equals("zh")) {
+            prompt = ChineseStart+
+                    ChineseLearning+
+                    ChineseEnd;
+        } else if(LanguageConfig.loadLanguage().equals("en")) {
+            prompt = EnglishStart+
+                    EnglishLearning+
+                    EnglishEnd;
+        } else {
+            prompt = EnglishStart+
+                    EnglishLearning+
+                    EnglishEnd;
+        }
+        return prompt+"\n";
+    }
 }

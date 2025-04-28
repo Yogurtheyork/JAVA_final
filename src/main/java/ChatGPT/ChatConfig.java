@@ -11,8 +11,6 @@ import java.io.IOException;
 
 public class ChatConfig {
     private static final String CONFIG_FILE = "src/main/resources/config.json";
-    private static final String SETTINGS_FILE = "src/main/resources/userSetting.json";
-    private static final Config DEFAULT_CONFIG = new Config("zh");
 
     // 設定檔內容
     public static class Config {
@@ -31,22 +29,6 @@ public class ChatConfig {
             System.out.println("設定已儲存至 config.json");
         } catch (IOException e) {
             System.err.println("無法儲存設定: " + e.getMessage());
-        }
-    }
-
-    // 讀取設定
-    public static String loadLanguage() {
-        Gson gson = new Gson();
-        try (FileReader reader = new FileReader(SETTINGS_FILE)) {
-            Setting setting = gson.fromJson(reader, Setting.class);
-            if (setting == null) {
-                System.err.println("Setting is null, using default setting");
-                return DEFAULT_CONFIG.languagePreference;
-            }
-            return setting.language;
-        } catch (IOException e) {
-            System.err.println("Could not read settings file: " + e.getMessage());
-            return DEFAULT_CONFIG.languagePreference;
         }
     }
 
