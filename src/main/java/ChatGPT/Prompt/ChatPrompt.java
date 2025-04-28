@@ -1,7 +1,7 @@
 package ChatGPT.Prompt;
 
-// ChatGPT
-import ChatGPT.ChatConfig;
+// Language
+import Language.LanguageConfig;
 
 // Json
 import com.google.gson.JsonObject;
@@ -19,7 +19,7 @@ public class ChatPrompt {
         loadPrompt();
     }
     private void loadPrompt() {
-        String language = ChatConfig.loadLanguage();
+        String language = LanguageConfig.loadLanguage();
         String languageFile;
 
         // 根據語言選擇不同檔案

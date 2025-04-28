@@ -1,6 +1,6 @@
 package ChatGPT.Prompt;
 
-import ChatGPT.ChatConfig;
+import Language.LanguageConfig;
 
 public class EventPrompt {
     // TODO: 將語言轉換寫進json檔
@@ -20,11 +20,11 @@ public class EventPrompt {
     //讓AI安排複習時間
     public String ReviewPrompt (){
         String prompt;
-        if (ChatConfig.loadLanguage().equals("zh")) {
+        if (LanguageConfig.loadLanguage().equals("zh")) {
             prompt = ChineseStart+
                     ChineseReview+
                     ChineseEnd;
-        } else if(ChatConfig.loadLanguage().equals("en")) {
+        } else if(LanguageConfig.loadLanguage().equals("en")) {
             prompt = EnglishStart+
                     EnglishReview+
                     EnglishEnd;
@@ -39,11 +39,11 @@ public class EventPrompt {
     //讓AI安排學習計畫
     public String LearningPrompt (){
         String prompt;
-        if (ChatConfig.loadLanguage().equals("zh")) {
+        if (LanguageConfig.loadLanguage().equals("zh")) {
             prompt = ChineseStart+
                     ChineseLearning+
                     ChineseEnd;
-        } else if(ChatConfig.loadLanguage().equals("en")) {
+        } else if(LanguageConfig.loadLanguage().equals("en")) {
             prompt = EnglishStart+
                     EnglishLearning+
                     EnglishEnd;
