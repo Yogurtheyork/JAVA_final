@@ -30,7 +30,6 @@ public class ActiveUI {
         CalendarUI calendarUI = new CalendarUI();
         mainFrame.add(calendarUI, BorderLayout.CENTER);
 
-
         // MainFrame initialization
         mainFrame.setSize(1200, 800);
         mainFrame.setMinimumSize(new Dimension(800, 600));

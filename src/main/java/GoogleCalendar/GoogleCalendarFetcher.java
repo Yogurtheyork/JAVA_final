@@ -5,15 +5,13 @@ import GoogleCalendar.service.GoogleCalendarServiceImpl;
 import GoogleCalendar.util.JsonUtil;
 import com.google.api.services.calendar.model.Event;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public class GoogleCalendarFetcher {
     private final GoogleCalendarService calendarService;
     private static final String EVENTS_FILE_PATH = "src/main/resources/events.json";
-    private static final String UPLOAD_FILE_PATH = "src/main/resources/uploadEvents.json";
-
-
 
     //Constructor
     public GoogleCalendarFetcher() throws Exception {
@@ -21,6 +19,14 @@ public class GoogleCalendarFetcher {
     }
 
     public void fetchAndSaveEvents() throws Exception {
+
+        // Ensure the events.json file exists
+        File eventsFile = new File(EVENTS_FILE_PATH);
+        if (!eventsFile.exists()) {
+            eventsFile.getParentFile().mkdirs(); // Ensure parent directories exist
+            eventsFile.createNewFile();
+        }
+        // Fetch events from events.json
         List<Event> events = calendarService.fetchEvents();
         if (events.isEmpty()) {
             System.out.println("找不到行程");
@@ -39,7 +45,7 @@ public class GoogleCalendarFetcher {
 
     public void uploadEventsFromFile() throws Exception {
         try {
-            List<Event> events = JsonUtil.loadEventsFromJson(UPLOAD_FILE_PATH);
+            List<Event> events = JsonUtil.loadEventsFromJson(EVENTS_FILE_PATH);
             calendarService.uploadEvents(events);
             System.out.println("已成功上傳所有行程");
         } catch (IOException e) {
