@@ -17,6 +17,7 @@ public class EventPrompt {
     private static final String EnglishReview = "";
     private static final String EnglishEnd = "";
 
+    //讓AI安排複習時間
     public String ReviewPrompt (){
         String prompt;
         if (ChatConfig.loadLanguage().equals("zh")) {
@@ -30,6 +31,25 @@ public class EventPrompt {
         } else {
             prompt = EnglishStart+
                     EnglishReview+
+                    EnglishEnd;
+        }
+        return prompt+"\n";
+    }
+
+    //讓AI安排學習計畫
+    public String LearningPrompt (){
+        String prompt;
+        if (ChatConfig.loadLanguage().equals("zh")) {
+            prompt = ChineseStart+
+                    ChineseLearning+
+                    ChineseEnd;
+        } else if(ChatConfig.loadLanguage().equals("en")) {
+            prompt = EnglishStart+
+                    EnglishLearning+
+                    EnglishEnd;
+        } else {
+            prompt = EnglishStart+
+                    EnglishLearning+
                     EnglishEnd;
         }
         return prompt+"\n";
