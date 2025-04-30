@@ -104,6 +104,37 @@ public class CalendarUI extends JPanel implements ActionListener {
         jp_search.add(btnWeek);
         jp_search.add(new JLabel("         "));
         jp_search.add(toNow);
+        JButton btnAddEvent = new JButton("新增行程");
+        btnAddEvent.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        btnAddEvent.addActionListener(e -> {
+            addNewEvent(LocalDate.of(currentYear, currentMonth, currentDay));
+        });
+
+        JButton btnDeleteEvent = new JButton("刪除今日行程");
+        btnDeleteEvent.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        btnDeleteEvent.addActionListener(e -> {
+            LocalDate date = LocalDate.of(currentYear, currentMonth, currentDay);
+            List<CalendarEvent> dayEvents = getEventsForDate(date);
+            if (!dayEvents.isEmpty()) {
+                if (JOptionPane.showConfirmDialog(this, "確定要刪除今天的所有事件嗎？", "確認", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    events.removeIf(ev -> ev.getDate().equals(date));
+                    saveEvents();
+                    if (currentView == ViewMode.WEEK) {
+                        showWeekView();
+                    } else {
+                        showCalendar(currentYear, currentMonth);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "今天沒有事件可以刪除");
+            }
+        });
+
+        jp_search.add(btnAddEvent);
+        jp_search.add(btnDeleteEvent);
+        addDeleteAllButton(jp_search);
+
+
 
         // Top panel layout
         JPanel jp_top = new JPanel(new BorderLayout());
@@ -351,7 +382,11 @@ public class CalendarUI extends JPanel implements ActionListener {
                         "確認刪除", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     events.remove(dayEvents.get(selectedIndex));
                     saveEvents();
-                    showCalendar(currentYear, currentMonth);
+                    if (currentView == ViewMode.WEEK) {
+                        showWeekView();
+                    } else {
+                        showCalendar(currentYear, currentMonth);
+                    }
                     dialog.dispose();
                 }
             } else {
@@ -372,26 +407,31 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.setVisible(true);
     }
 
-    private void addNewEvent(LocalDate date) {
+
+    private void addNewEvent(LocalDate ignoredDate) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "新增事件", true);
         dialog.setLayout(new BorderLayout());
-        dialog.setSize(400, 300);
+        dialog.setSize(400, 350);
         dialog.setLocationRelativeTo(this);
 
         // Event input components
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 5, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         inputPanel.add(new JLabel("事件名稱:"));
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
 
-        inputPanel.add(new JLabel("事件開始:"));
-        JTextField timeFieldStart = new JTextField("HH:MM");
+        inputPanel.add(new JLabel("日期 (YYYY-MM-DD):"));
+        JTextField dateField = new JTextField();
+        inputPanel.add(dateField);
+
+        inputPanel.add(new JLabel("開始時間 (HH:mm):"));
+        JTextField timeFieldStart = new JTextField();
         inputPanel.add(timeFieldStart);
 
-        inputPanel.add(new JLabel("事件結束:"));
-        JTextField timeFieldEnd = new JTextField("HH:MM");
+        inputPanel.add(new JLabel("結束時間 (HH:mm):"));
+        JTextField timeFieldEnd = new JTextField();
         inputPanel.add(timeFieldEnd);
 
         inputPanel.add(new JLabel("備註:"));
@@ -402,23 +442,34 @@ public class CalendarUI extends JPanel implements ActionListener {
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
-            if (titleField.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
-                return;
+            try {
+                if (titleField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
+                    return;
+                }
+
+                LocalDate inputDate = LocalDate.parse(dateField.getText(), DATE_FORMAT);
+
+                CalendarEvent newEvent = new CalendarEvent(
+                        titleField.getText(),
+                        inputDate,
+                        timeFieldStart.getText(),
+                        timeFieldEnd.getText(),
+                        descField.getText()
+                );
+
+                events.add(newEvent);
+                saveEvents();
+                if (currentView == ViewMode.WEEK) {
+                    showWeekView();
+                } else {
+                    showCalendar(currentYear, currentMonth);
+                }
+                dialog.dispose();
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "日期格式錯誤，請使用 YYYY-MM-DD");
             }
-
-            CalendarEvent newEvent = new CalendarEvent(
-                    titleField.getText(),
-                    date,
-                    timeFieldStart.getText(),
-                    timeFieldEnd.getText(),
-                    descField.getText()
-            );
-
-            events.add(newEvent);
-            saveEvents();
-            showCalendar(currentYear, currentMonth);
-            dialog.dispose();
         });
 
         JButton cancelButton = new JButton("取消");
@@ -431,6 +482,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
 
     private void editEvent(CalendarEvent event) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "編輯事件", true);
@@ -485,7 +537,11 @@ public class CalendarUI extends JPanel implements ActionListener {
 
             events.add(updatedEvent);
             saveEvents();
-            showCalendar(currentYear, currentMonth);
+            if (currentView == ViewMode.WEEK) {
+                showWeekView();
+            } else {
+                showCalendar(currentYear, currentMonth);
+            }
             dialog.dispose();
         });
 
@@ -663,15 +719,29 @@ public class CalendarUI extends JPanel implements ActionListener {
         return firstWeekOfMonth;
     }
 
+    private void addDeleteAllButton(JPanel searchPanel) {
+        JButton btnDeleteAllEvents = new JButton("刪除所有行程");
+        btnDeleteAllEvents.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        btnDeleteAllEvents.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(this, "確定要刪除所有行程嗎？", "確認刪除", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                events.clear();
+                saveEvents();
+                if (currentView == ViewMode.WEEK) {
+                    showWeekView();
+                } else {
+                    showCalendar(currentYear, currentMonth);
+                }
+                JOptionPane.showMessageDialog(this, "所有行程已刪除。", "刪除完成", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        searchPanel.add(btnDeleteAllEvents);
+    }
     // Week view implementation
     private void showWeekView() {
         calendarPanel.removeAll();
 
-        // Get the start of the week containing the current day
         LocalDate currentDate = LocalDate.of(currentYear, currentMonth, currentDay);
         LocalDate startOfWeek = currentDate.minusDays(currentDate.getDayOfWeek().getValue() - 1);
-
-        // Create title for week view
         LocalDate endOfWeek = startOfWeek.plusDays(6);
         String weekTitle = startOfWeek.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) +
                 " - " +
@@ -680,41 +750,32 @@ public class CalendarUI extends JPanel implements ActionListener {
         JLabel weekLabel = new JLabel(weekTitle, SwingConstants.CENTER);
         weekLabel.setFont(new Font("微軟正黑體", Font.BOLD, 20));
 
-        // Create week table
         String[] columnNames = {"時間", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
-
-        // Create time slots (hour-based)
         String[] timeSlots = new String[24];
         for (int i = 0; i < 24; i++) {
             timeSlots[i] = String.format("%02d:00", i);
         }
 
-        // Create data model
         Object[][] data = new Object[timeSlots.length][columnNames.length];
         for (int i = 0; i < timeSlots.length; i++) {
             data[i][0] = timeSlots[i];
             for (int j = 1; j < columnNames.length; j++) {
-                data[i][j] = ""; // Empty cells initially
+                data[i][j] = "";
             }
         }
 
-        // Fill in events for the week
         for (int day = 0; day < 7; day++) {
             LocalDate date = startOfWeek.plusDays(day);
             List<CalendarEvent> dayEvents = getEventsForDate(date);
 
             for (CalendarEvent event : dayEvents) {
-                // Parse event time to get hour
-                String time = event.getEnd();
                 try {
-                    int hour = Integer.parseInt(time.split(":")[0]);
-                    if (hour >= 0 && hour < 24) {
-                        // Column index is day+1 because column 0 is for time labels
-                        int dayColumn = day + 1;
-                        // Store existing content if any
-                        String existingContent = (String) data[hour][dayColumn];
+                    int startHour = Integer.parseInt(event.getStart().split(":" )[0]);
+                    int endHour = Integer.parseInt(event.getEnd().split(":" )[0]);
+                    int dayColumn = day + 1;
 
-                        // Append new event (or set if empty)
+                    for (int hour = startHour; hour <= endHour && hour < 24; hour++) {
+                        String existingContent = (String) data[hour][dayColumn];
                         if (existingContent.isEmpty()) {
                             data[hour][dayColumn] = event.getTitle();
                         } else {
@@ -730,7 +791,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column > 0; // Time column is not editable
+                return column > 0;
             }
         };
 
@@ -739,14 +800,13 @@ public class CalendarUI extends JPanel implements ActionListener {
         weekTable.getColumnModel().getColumn(0).setPreferredWidth(60);
         weekTable.setDefaultRenderer(Object.class, new ScheduleCellRenderer());
 
-        // Add listener for adding events
         weekTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = weekTable.rowAtPoint(e.getPoint());
                 int col = weekTable.columnAtPoint(e.getPoint());
 
-                if (col > 0) { // Not time column
+                if (col > 0) {
                     LocalDate date = startOfWeek.plusDays(col - 1);
                     String time = timeSlots[row];
                     showWeekEventDialog(date, time);
@@ -755,7 +815,6 @@ public class CalendarUI extends JPanel implements ActionListener {
         });
 
         JScrollPane scrollPane = new JScrollPane(weekTable);
-
         calendarPanel.add(weekLabel, BorderLayout.NORTH);
         calendarPanel.add(scrollPane, BorderLayout.CENTER);
         calendarPanel.revalidate();
@@ -768,7 +827,6 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
 
-        // Event input components
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -788,12 +846,17 @@ public class CalendarUI extends JPanel implements ActionListener {
         JTextField descField = new JTextField();
         inputPanel.add(descField);
 
-        // Buttons
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
             if (titleField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
+                return;
+            }
+
+            String endTime = timeFieldEnd.getText().trim();
+            if (!endTime.matches("\\d{2}:\\d{2}")) {
+                JOptionPane.showMessageDialog(dialog, "結束時間格式錯誤，請使用 HH:mm");
                 return;
             }
 
@@ -807,7 +870,7 @@ public class CalendarUI extends JPanel implements ActionListener {
 
             events.add(newEvent);
             saveEvents();
-            showWeekView(); // Refresh week view
+            showWeekView();
             dialog.dispose();
         });
 
@@ -821,6 +884,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
 
     // Year view implementation
     private void showYearView() {
@@ -859,13 +923,11 @@ public class CalendarUI extends JPanel implements ActionListener {
         // Month title
         String[] monthNames = {"一月", "二月", "三月", "四月", "五月", "六月",
                 "七月", "八月", "九月", "十月", "十一月", "十二月"};
-        JLabel titleLabel = new JLabel(monthNames[month-1], SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel(monthNames[month - 1], SwingConstants.CENTER);
         titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 14));
 
-        // Day grid
         JPanel daysPanel = new JPanel(new GridLayout(7, 7, 1, 1));
 
-        // Day headers
         String[] dayHeaders = {"日", "一", "二", "三", "四", "五", "六"};
         for (String dayHeader : dayHeaders) {
             JLabel label = new JLabel(dayHeader, SwingConstants.CENTER);
@@ -873,33 +935,31 @@ public class CalendarUI extends JPanel implements ActionListener {
             daysPanel.add(label);
         }
 
-        // Calculate days and positions
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, month - 1);
         cal.set(Calendar.DAY_OF_MONTH, 1);
 
-        int firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+        int firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        if (firstDayOfWeek == Calendar.SUNDAY) {
+            firstDayOfWeek = 0;
+        } else {
+            firstDayOfWeek -= 1;
+        }
         int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        // Add empty cells for days before the 1st
         for (int i = 0; i < firstDayOfWeek; i++) {
             daysPanel.add(new JLabel(""));
         }
 
-        // Add days of the month
         for (int day = 1; day <= daysInMonth; day++) {
             JLabel dayLabel = new JLabel(String.valueOf(day), SwingConstants.CENTER);
             dayLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 10));
 
-            // Check for events on this date
             LocalDate date = LocalDate.of(year, month, day);
             List<CalendarEvent> dayEvents = getEventsForDate(date);
-
             if (!dayEvents.isEmpty()) {
                 dayLabel.setForeground(Color.BLUE);
-
-                // Create tooltip for events
                 StringBuilder tooltip = new StringBuilder("<html>");
                 for (CalendarEvent event : dayEvents) {
                     tooltip.append(event.getEnd()).append(" - ").append(event.getTitle()).append("<br>");
@@ -908,7 +968,6 @@ public class CalendarUI extends JPanel implements ActionListener {
                 dayLabel.setToolTipText(tooltip.toString());
             }
 
-            // Highlight today
             Calendar today = Calendar.getInstance();
             if (year == today.get(Calendar.YEAR) &&
                     month - 1 == today.get(Calendar.MONTH) &&
@@ -917,7 +976,6 @@ public class CalendarUI extends JPanel implements ActionListener {
                 dayLabel.setBackground(new Color(173, 216, 230));
             }
 
-            // Add click listener to navigate to month view
             final int selectedMonth = month;
             final int selectedDay = day;
             dayLabel.addMouseListener(new MouseAdapter() {
@@ -934,8 +992,8 @@ public class CalendarUI extends JPanel implements ActionListener {
             daysPanel.add(dayLabel);
         }
 
-        // Add empty cells for remaining grid
-        int remainingCells = 7 * 7 - firstDayOfWeek - daysInMonth;
+        int totalCells = firstDayOfWeek + daysInMonth;
+        int remainingCells = 7 * 6 - totalCells; // 6 weeks = 42 cells
         for (int i = 0; i < remainingCells; i++) {
             daysPanel.add(new JLabel(""));
         }
@@ -943,7 +1001,6 @@ public class CalendarUI extends JPanel implements ActionListener {
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(daysPanel, BorderLayout.CENTER);
 
-        // Add major events indicator at the bottom (if any)
         int eventCount = countEventsInMonth(year, month);
         JLabel eventsLabel = new JLabel("事件: " + eventCount, SwingConstants.CENTER);
         eventsLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 10));
