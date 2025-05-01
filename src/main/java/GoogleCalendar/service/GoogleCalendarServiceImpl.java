@@ -11,10 +11,12 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.*;
-import java.security.GeneralSecurityException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,5 +81,38 @@ public class GoogleCalendarServiceImpl implements GoogleCalendarService {
     @Override
     public void updateEvent(Event event) throws Exception {
         calendarService.events().update("primary", event.getId(), event).execute();
+    }
+
+    @Override
+    public void insertEvent(Event event) throws Exception{
+        calendarService.events().insert("primary", event).execute();
+    }
+
+    @Override
+    public Event createEvent(String summary, String location, String description,
+                             ZonedDateTime startTime, ZonedDateTime endTime){
+
+        DateTimeFormatter RFC3339_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+
+        // Create the event
+        Event event = new Event()
+                .setSummary(summary)
+                .setLocation(location)
+                .setDescription(description);
+
+        // Set start time
+        DateTime startDateTime = new DateTime(RFC3339_FORMATTER.format(startTime));
+        EventDateTime start = new EventDateTime()
+                .setDateTime(startDateTime)
+                .setTimeZone("Asia/Taipei");
+        event.setStart(start);
+
+        // Set end time
+        DateTime endDateTime = new DateTime(RFC3339_FORMATTER.format(endTime));
+        EventDateTime end = new EventDateTime()
+                .setDateTime(endDateTime)
+                .setTimeZone("Asia/Taipei");
+        event.setEnd(end);
+        return event;
     }
 } 
