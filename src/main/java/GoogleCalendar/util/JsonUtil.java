@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.util.List;
-import java.util.Map;
 
 public class JsonUtil {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();

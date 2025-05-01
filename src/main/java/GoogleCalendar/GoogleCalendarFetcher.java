@@ -26,6 +26,7 @@ public class GoogleCalendarFetcher {
             eventsFile.getParentFile().mkdirs(); // Ensure parent directories exist
             eventsFile.createNewFile();
         }
+
         // Fetch events from events.json
         List<Event> events = calendarService.fetchEvents();
         if (events.isEmpty()) {
