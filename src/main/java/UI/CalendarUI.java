@@ -117,7 +117,7 @@ public class CalendarUI extends JPanel implements ActionListener {
             List<CalendarEvent> dayEvents = getEventsForDate(date);
             if (!dayEvents.isEmpty()) {
                 if (JOptionPane.showConfirmDialog(this, "確定要刪除今天的所有事件嗎？", "確認", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                    events.removeIf(ev -> ev.getDate().equals(date));
+                    events.removeIf(ev -> ev.getStartDate() .equals(date));
                     saveEvents();
                     if (currentView == ViewMode.WEEK) {
                         showWeekView();
@@ -192,56 +192,74 @@ public class CalendarUI extends JPanel implements ActionListener {
     // Event class to store calendar events
     public static class CalendarEvent {
         private String title;
-        private LocalDate date;
+        private LocalDate startDate;
+        private LocalDate endDate;
         private String start;
         private String end;
         private String description;
-        private String googleCalendarId; // For future Google Calendar API integration
+        private String googleCalendarId;
 
-        public CalendarEvent(String title, LocalDate date, String start, String end, String description) {
+        public CalendarEvent(String title, LocalDate startDate, LocalDate endDate, String start, String end, String description) {
             this.title = title;
-            this.date = date;
+            this.startDate = startDate;
+            this.endDate = endDate;
             this.start = start;
             this.end = end;
             this.description = description;
             this.googleCalendarId = "";
         }
 
+
         public JSONObject toJSON() {
-            JSONObject eventJson = new JSONObject();
-            eventJson.put("title", title);
-            eventJson.put("date", date.format(DATE_FORMAT));
-            eventJson.put("start", start);
-            eventJson.put("end", end);
-            eventJson.put("description", description);
-            eventJson.put("googleCalendarId", googleCalendarId);
-            return eventJson;
+            JSONObject obj = new JSONObject();
+            obj.put("title", title);
+            obj.put("startDate", startDate.format(DATE_FORMAT));
+            obj.put("endDate", endDate.format(DATE_FORMAT));
+            obj.put("start", start);
+            obj.put("end", end);
+            obj.put("description", description);
+            obj.put("googleCalendarId", googleCalendarId);
+            return obj;
         }
 
         public static CalendarEvent fromJSON(JSONObject jsonObject) {
             String title = (String) jsonObject.get("title");
-            LocalDate date = LocalDate.parse((String) jsonObject.get("date"), DATE_FORMAT);
+
+            String startDateStr = (String) jsonObject.get("startDate");
+            String endDateStr = (String) jsonObject.get("endDate");
+            String dateStr = (String) jsonObject.get("date"); // 舊格式欄位
+
+            LocalDate startDate, endDate;
+
+            if (startDateStr != null && endDateStr != null) {
+                startDate = LocalDate.parse(startDateStr, DATE_FORMAT);
+                endDate = LocalDate.parse(endDateStr, DATE_FORMAT);
+            } else if (dateStr != null) {
+                startDate = LocalDate.parse(dateStr, DATE_FORMAT);
+                endDate = startDate; // 舊格式只有單日
+            } else {
+                throw new IllegalArgumentException("事件日期缺失");
+            }
+
             String start = (String) jsonObject.get("start");
             String end = (String) jsonObject.get("end");
             String description = (String) jsonObject.get("description");
 
-            CalendarEvent event = new CalendarEvent(title, date, start, end, description);
-            String googleId = (String) jsonObject.get("googleCalendarId");
-            if (googleId != null) {
-                event.googleCalendarId = googleId;
-            }
-            return event;
+            CalendarEvent e = new CalendarEvent(title, startDate, endDate, start, end, description);
+            String gid = (String) jsonObject.get("googleCalendarId");
+            if (gid != null) e.setGoogleCalendarId(gid);
+            return e;
         }
+
 
         // Getters
         public String getTitle() { return title; }
-        public LocalDate getDate() { return date; }
+        public LocalDate getStartDate() { return startDate; }
+        public LocalDate getEndDate() { return endDate; }
         public String getStart() { return start; }
         public String getEnd() { return end; }
         public String getDescription() { return description; }
         public String getGoogleCalendarId() { return googleCalendarId; }
-
-        // Setters
         public void setGoogleCalendarId(String id) { this.googleCalendarId = id; }
     }
 
@@ -409,22 +427,25 @@ public class CalendarUI extends JPanel implements ActionListener {
 
 
     private void addNewEvent(LocalDate ignoredDate) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "新增事件", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "新增事件 (可跨天)", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 350);
         dialog.setLocationRelativeTo(this);
 
-        // Event input components
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 5, 10));
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2, 5, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         inputPanel.add(new JLabel("事件名稱:"));
         JTextField titleField = new JTextField();
         inputPanel.add(titleField);
 
-        inputPanel.add(new JLabel("日期 (YYYY-MM-DD):"));
-        JTextField dateField = new JTextField();
-        inputPanel.add(dateField);
+        inputPanel.add(new JLabel("開始日期 (YYYY-MM-DD):"));
+        JTextField startDateField = new JTextField();
+        inputPanel.add(startDateField);
+
+        inputPanel.add(new JLabel("結束日期 (YYYY-MM-DD):"));
+        JTextField endDateField = new JTextField();
+        inputPanel.add(endDateField);
 
         inputPanel.add(new JLabel("開始時間 (HH:mm):"));
         JTextField timeFieldStart = new JTextField();
@@ -438,21 +459,23 @@ public class CalendarUI extends JPanel implements ActionListener {
         JTextField descField = new JTextField();
         inputPanel.add(descField);
 
-        // Buttons
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
             try {
-                if (titleField.getText().trim().isEmpty()) {
+                String title = titleField.getText().trim();
+                LocalDate startDate = LocalDate.parse(startDateField.getText(), DATE_FORMAT);
+                LocalDate endDate = LocalDate.parse(endDateField.getText(), DATE_FORMAT);
+
+                if (title.isEmpty()) {
                     JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
                     return;
                 }
 
-                LocalDate inputDate = LocalDate.parse(dateField.getText(), DATE_FORMAT);
-
                 CalendarEvent newEvent = new CalendarEvent(
-                        titleField.getText(),
-                        inputDate,
+                        title,
+                        startDate,
+                        endDate,
                         timeFieldStart.getText(),
                         timeFieldEnd.getText(),
                         descField.getText()
@@ -524,7 +547,8 @@ public class CalendarUI extends JPanel implements ActionListener {
 
             CalendarEvent updatedEvent = new CalendarEvent(
                     titleField.getText(),
-                    event.getDate(),
+                    event.getStartDate(),
+                    event.getEndDate(),
                     timeFieldStart.getText(),
                     timeFieldEnd.getText(),
                     descField.getText()
@@ -862,7 +886,8 @@ public class CalendarUI extends JPanel implements ActionListener {
 
             CalendarEvent newEvent = new CalendarEvent(
                     titleField.getText(),
-                    date,
+                    date, // startDate
+                    date, // endDate (與 startDate 相同，表示單日)
                     timeFieldStart.getText(),
                     timeFieldEnd.getText(),
                     descField.getText()
@@ -1063,7 +1088,8 @@ public class CalendarUI extends JPanel implements ActionListener {
     private List<CalendarEvent> getEventsForDate(LocalDate date) {
         List<CalendarEvent> result = new ArrayList<>();
         for (CalendarEvent event : events) {
-            if (event.getDate().equals(date)) {
+            if ((date.isEqual(event.getStartDate()) || date.isAfter(event.getStartDate())) &&
+                    (date.isEqual(event.getEndDate()) || date.isBefore(event.getEndDate()))) {
                 result.add(event);
             }
         }
@@ -1076,7 +1102,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         LocalDate endDate = startDate.plusMonths(1).minusDays(1);
 
         for (CalendarEvent event : events) {
-            LocalDate eventDate = event.getDate();
+            LocalDate eventDate = event.getStartDate(); // 如果你只是取事件起始那天
             if ((eventDate.isEqual(startDate) || eventDate.isAfter(startDate)) &&
                     (eventDate.isEqual(endDate) || eventDate.isBefore(endDate))) {
                 count++;
