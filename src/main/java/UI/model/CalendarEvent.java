@@ -3,7 +3,7 @@ package UI.model;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.json.simple.JSONObject;
-
+import java.time.format.DateTimeParseException;
 public class CalendarEvent {
 
     //initialize variables
@@ -39,17 +39,29 @@ public class CalendarEvent {
     }
 
     public static CalendarEvent fromJSON(JSONObject jsonObject) {
-        String title = (String) jsonObject.get("title");
-        LocalDate date = LocalDate.parse((String) jsonObject.get("date"), DATE_FORMAT);
-        String start = (String) jsonObject.get("start");
-        String end = (String) jsonObject.get("end");
-        String description = (String) jsonObject.get("description");
+        String title = jsonObject.containsKey("title") ? (String) jsonObject.get("title") : "(未命名)";
+
+        LocalDate date = null;
+        if (jsonObject.containsKey("date")) {
+            try {
+                date = LocalDate.parse((String) jsonObject.get("date"), DATE_FORMAT);
+            } catch (Exception e) {
+                System.err.println("日期格式錯誤：" + jsonObject.get("date") + "，跳過解析。");
+            }
+        } else {
+            System.err.println("錯誤：這筆事件缺少 date 欄位 -> " + jsonObject);
+        }
+
+        String start = jsonObject.containsKey("start") ? (String) jsonObject.get("start") : "";
+        String end = jsonObject.containsKey("end") ? (String) jsonObject.get("end") : "";
+        String description = jsonObject.containsKey("description") ? (String) jsonObject.get("description") : "";
 
         CalendarEvent event = new CalendarEvent(title, date, start, end, description);
-        String googleId = (String) jsonObject.get("googleCalendarId");
-        if (googleId != null) {
-            event.googleCalendarId = googleId;
+
+        if (jsonObject.containsKey("googleCalendarId")) {
+            event.googleCalendarId = (String) jsonObject.get("googleCalendarId");
         }
+
         return event;
     }
 
