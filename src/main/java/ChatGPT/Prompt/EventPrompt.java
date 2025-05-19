@@ -12,10 +12,10 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class EventPrompt {
-    private static String Start;
-    private static String Learning;
-    private static String Review;
-    private static String End;
+    private String Start;
+    private String Learning;
+    private String Review;
+    private String End;
 
     public EventPrompt(){
         String language = LanguageConfig.loadLanguage();
@@ -23,11 +23,11 @@ public class EventPrompt {
 
         // 根據語言選擇不同檔案
         if ("zh".equals(language)) {
-            languageFile = "src/main/resources/language/Chinese/EventPrompt.json";
+            languageFile = "language/Chinese/EventPrompt.json";
         } else if ("en".equals(language)) {
-            languageFile = "src/main/resources/language/English/EventPrompt.json";
+            languageFile = "language/English/EventPrompt.json";
         } else {
-            languageFile = "src/main/resources/language/English/EventPrompt.json";
+            languageFile = "language/English/EventPrompt.json";
         }
         try (FileReader reader = new FileReader(languageFile)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
