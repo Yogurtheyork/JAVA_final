@@ -1,57 +1,53 @@
 package ChatGPT.Prompt;
 
+// Language
 import Language.LanguageConfig;
 
-public class EventPrompt {
-    // TODO: 將語言轉換寫進json檔
-    private static final String ChineseStart =
-            "請作為一個[學習助理]協助我安排行程，並提供我[行程名稱]、[開始時間]、[結束時間]、[地點]、[備註]等資訊。" +
-                    "以下json格式資料是[現有的行程]，";
-    private static final String ChineseLearning = "";
-    private static final String ChineseReview = "";
-    private static final String ChineseEnd = "";
-    private static final String EnglishStart =
-            "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [Event Name], [Start Time], [End Time], [Location], and [Notes]." +
-                    "The following json format data is [existing schedule],";
-    private static final String EnglishLearning = "";
-    private static final String EnglishReview = "";
-    private static final String EnglishEnd = "";
+// Json
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+// Java
+import java.io.FileReader;
+import java.io.IOException;
+
+public class EventPrompt {
+    private static String Start;
+    private static String Learning;
+    private static String Review;
+    private static String End;
+
+    public EventPrompt(){
+        String language = LanguageConfig.loadLanguage();
+        String languageFile;
+
+        // 根據語言選擇不同檔案
+        if ("zh".equals(language)) {
+            languageFile = "src/main/resources/language/Chinese/EventPrompt.json";
+        } else if ("en".equals(language)) {
+            languageFile = "src/main/resources/language/English/EventPrompt.json";
+        } else {
+            languageFile = "src/main/resources/language/English/EventPrompt.json";
+        }
+        try (FileReader reader = new FileReader(languageFile)) {
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            Start = jsonObject.get("Start").getAsString();
+            Learning = jsonObject.get("Learning").getAsString();
+            Review = jsonObject.get("Review").getAsString();
+            End = jsonObject.get("End").getAsString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     //讓AI安排複習時間
     public String ReviewPrompt (){
-        String prompt;
-        if (LanguageConfig.loadLanguage().equals("zh")) {
-            prompt = ChineseStart+
-                    ChineseReview+
-                    ChineseEnd;
-        } else if(LanguageConfig.loadLanguage().equals("en")) {
-            prompt = EnglishStart+
-                    EnglishReview+
-                    EnglishEnd;
-        } else {
-            prompt = EnglishStart+
-                    EnglishReview+
-                    EnglishEnd;
-        }
+        String prompt = Start + Review + End;
         return prompt+"\n";
     }
 
     //讓AI安排學習計畫
     public String LearningPrompt (){
-        String prompt;
-        if (LanguageConfig.loadLanguage().equals("zh")) {
-            prompt = ChineseStart+
-                    ChineseLearning+
-                    ChineseEnd;
-        } else if(LanguageConfig.loadLanguage().equals("en")) {
-            prompt = EnglishStart+
-                    EnglishLearning+
-                    EnglishEnd;
-        } else {
-            prompt = EnglishStart+
-                    EnglishLearning+
-                    EnglishEnd;
-        }
+        String prompt = Start + Learning + End;
         return prompt+"\n";
     }
 }
