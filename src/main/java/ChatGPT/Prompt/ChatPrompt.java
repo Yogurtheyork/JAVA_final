@@ -23,9 +23,9 @@ public class ChatPrompt {
         String languageFile;
 
         // 根據語言選擇不同檔案
-        if ("zh".equals(language)) {
+        if (language.equals("zh")) {
             languageFile = "src/main/resources/language/Chinese/ChatPrompt.json";
-        } else if ("en".equals(language)) {
+        } else if (language.equals("en")) {
             languageFile = "src/main/resources/language/English/ChatPrompt.json";
         } else {
             languageFile = "src/main/resources/language/English/ChatPrompt.json";

@@ -1,28 +1,33 @@
 package Language;
 
-import DataStructures.Setting;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import com.google.gson.Gson;
-
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class LanguageConfig {
-    private static final String SETTINGS_FILE = "src/main/resources/userSetting.json";
-    private static final String DEFAUT_lANGUAGE = "English";
+    private static final String DEFAULT_LANGUAGE = "en";
     // 讀取設定
     public static String loadLanguage() {
-        Gson gson = new Gson();
-        try (FileReader reader = new FileReader(SETTINGS_FILE)) {
-            Setting setting = gson.fromJson(reader, Setting.class);
-            if (setting == null) {
-                System.err.println("Setting is null, using default setting");
-                return DEFAUT_lANGUAGE;
+        InputStream is = LanguageConfig.class.getClassLoader().getResourceAsStream("userSetting.json");
+        if (is == null) {
+            System.err.println("cannot find userSetting.json");
+            return DEFAULT_LANGUAGE;
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            if (json.has("language")) {
+                return json.get("language").getAsString();
+            } else {
+                System.err.println("userSetting.json does not contain 'language' key");
+                return DEFAULT_LANGUAGE;
             }
-            return setting.language;
-        } catch (IOException e) {
-            System.err.println("Could not read settings file: " + e.getMessage());
-            return DEFAUT_lANGUAGE;
+        } catch (Exception e) {
+            System.err.println("Could not read json:" + e.getMessage());
+            return DEFAULT_LANGUAGE;
         }
     }
-}   
+}
