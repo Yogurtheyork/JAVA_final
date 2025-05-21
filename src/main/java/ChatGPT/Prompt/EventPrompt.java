@@ -69,5 +69,6 @@ public class EventPrompt {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return "nothing";
     }
 }
