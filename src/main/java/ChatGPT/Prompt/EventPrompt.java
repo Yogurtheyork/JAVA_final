@@ -9,6 +9,8 @@ import com.google.gson.JsonParser;
 
 // Java
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 
 public class EventPrompt {
@@ -17,24 +19,14 @@ public class EventPrompt {
     private String Review;
     private String End;
 
-    private String begin = "現在";
-    private String finish = "15分鐘後";
-    private String times = "數";
-    private String time = "15分鐘";
+    private String begin = "now";
+    private String finish = "15 minutes later";
+    private String times = "any";
+    private String duration = "15 minutes";
 
 
     public EventPrompt(){
-        String language = LanguageConfig.loadLanguage();
-        String languageFile;
-
-        // 根據語言選擇不同檔案
-        if ("zh".equals(language)) {
-            languageFile = "language/Chinese/EventPrompt.json";
-        } else if ("en".equals(language)) {
-            languageFile = "language/English/EventPrompt.json";
-        } else {
-            languageFile = "language/English/EventPrompt.json";
-        }
+        String languageFile = "language/English/EventPrompt.json";
         try (FileReader reader = new FileReader(languageFile)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             Start = jsonObject.get("Start").getAsString();
@@ -46,27 +38,36 @@ public class EventPrompt {
         }
     }
     //請先設定時間
-    public void setTime(String begin, String finish, String times, String time){
+    public void setTime(String begin, String finish, String times, String duration){
         this.begin = begin;
         this.finish = finish;
         this.times = times;
-        this.time = time;
+        this.duration = duration;
     }
 
     public String getTime(){
-        String returnTime = "" + this.begin + "" + this.finish + "" + this.times + "" + this.time + "";
+        String returnTime = "Please arrange [" + this.times + "] times events from [" + this.begin + "] to [" + this.finish + "] everytimes for [" + this.duration + "].";
         return returnTime;
     }
 
     //讓AI安排複習時間
-    public String ReviewPrompt (){
-        String prompt = Start + Review + End;
-        return prompt+"\n";
+    public String ReviewPrompt (String PATH){
+        String prompt = this.Start + this.jsonToString(PATH) + this.Review + this.getTime() + this.End;
+        return prompt;
     }
 
     //讓AI安排學習計畫
-    public String LearningPrompt (){
-        String prompt = Start + Learning + End;
-        return prompt+"\n";
+    public String LearningPrompt (String PATH){
+        String prompt = Start + this.jsonToString(PATH) + Learning + this.getTime() + End;
+        return prompt;
+    }
+
+    public String jsonToString(String PATH){
+        try {
+            String jsonString = new String(Files.readAllBytes(Paths.get(PATH)));
+            return jsonString;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

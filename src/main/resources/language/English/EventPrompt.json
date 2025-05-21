@@ -2,5 +2,5 @@
   "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [Event Name], [Start Time], [End Time], [Location], and [Notes].The following json format data is [existing schedule],",
   "Learning": "",
   "Review": "",
-  "End": ""
+  "End": "and return only the json format data containing [Event Name], [Start Time], [End Time], [Location], and [Notes]."
 }
