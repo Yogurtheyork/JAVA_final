@@ -1,6 +1,6 @@
 {
-  "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [Event Name], [Start Time], [End Time], [Location], and [Notes].The following json format data is [existing schedule],",
+  "Start": "請作為[學習助手]幫助我安排，並提供我[事件名稱]、[開始時間]、[結束時間]、[地點]和[備註]等信息。以下json格式數據是[現有日程]，",
   "Learning": "",
   "Review": "",
-  "End": ""
+  "End": "並回傳只包含[事件名稱]、[開始時間]、[結束時間]、[地點]和[備註]的json格式數據。"
 }
