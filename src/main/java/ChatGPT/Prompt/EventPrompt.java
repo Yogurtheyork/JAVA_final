@@ -17,6 +17,7 @@ public class EventPrompt {
     private String Start;
     private String Learning;
     private String Review;
+    private String Project;
     private String End;
 
     private String begin = "now";
@@ -32,6 +33,7 @@ public class EventPrompt {
             Start = jsonObject.get("Start").getAsString();
             Learning = jsonObject.get("Learning").getAsString();
             Review = jsonObject.get("Review").getAsString();
+            Project = jsonObject.get("Project").getAsString();
             End = jsonObject.get("End").getAsString();
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,6 +61,11 @@ public class EventPrompt {
     //讓AI安排學習計畫
     public String LearningPrompt (String PATH){
         String prompt = Start + this.jsonToString(PATH) + Learning + this.getTime() + End;
+        return prompt;
+    }
+
+    public String ProjectPrompt (String PATH){
+        String prompt = Start + this.jsonToString(PATH) + Project + this.getTime() + End;
         return prompt;
     }
 
