@@ -17,6 +17,12 @@ public class EventPrompt {
     private String Review;
     private String End;
 
+    private String begin = "現在";
+    private String finish = "15分鐘後";
+    private String times = "數";
+    private String time = "15分鐘";
+
+
     public EventPrompt(){
         String language = LanguageConfig.loadLanguage();
         String languageFile;
@@ -39,6 +45,19 @@ public class EventPrompt {
             e.printStackTrace();
         }
     }
+    //請先設定時間
+    public void setTime(String begin, String finish, String times, String time){
+        this.begin = begin;
+        this.finish = finish;
+        this.times = times;
+        this.time = time;
+    }
+
+    public String getTime(){
+        String returnTime = "" + this.begin + "" + this.finish + "" + this.times + "" + this.time + "";
+        return returnTime;
+    }
+
     //讓AI安排複習時間
     public String ReviewPrompt (){
         String prompt = Start + Review + End;
