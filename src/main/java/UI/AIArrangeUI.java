@@ -2,93 +2,139 @@ package UI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class AIArrangeUI extends JFrame {
 
     public AIArrangeUI() {
         setTitle("AI 行程安排");
-        setSize(400, 300);
+        setSize(500, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // 主面板
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5,5,5,5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // 事件名稱 Label + TextField
+        // 事件名稱
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("事件名稱:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
         JTextField eventNameField = new JTextField();
         panel.add(eventNameField, gbc);
 
-        // 行程下拉選單 Label + ComboBox
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("選擇行程:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1;
-        String[] schedules = {"行程A", "行程B", "行程C"};
-        JComboBox<String> scheduleComboBox = new JComboBox<>(schedules);
-        panel.add(scheduleComboBox, gbc);
+        // 選項
+        gbc.gridx = 0; gbc.gridy++;
+        panel.add(new JLabel("選項:"), gbc);
+        gbc.gridx = 1;
+        String[] eventOptions = {"安排學習計畫", "安排複習考試", "安排專案進度", "其他"};
+        JComboBox<String> eventComboBox = new JComboBox<>(eventOptions);
+        panel.add(eventComboBox, gbc);
 
-        // 起始時間下拉選單 Label + ComboBox
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("開始時間:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2;
-        String[] times = new String[24];
-        for (int i = 0; i < 24; i++) {
-            times[i] = String.format("%02d:00", i);
-        }
-        JComboBox<String> startTimeComboBox = new JComboBox<>(times);
+        // 從
+        gbc.gridx = 0; gbc.gridy++;
+        panel.add(new JLabel("從:"), gbc);
+        gbc.gridx = 1;
+        String[] fromOptions = {"現在", "本事件開始", "某月某日"};
+        JComboBox<String> fromComboBox = new JComboBox<>(fromOptions);
+        panel.add(fromComboBox, gbc);
 
-        panel.add(startTimeComboBox, gbc);
+        // 從日期選擇器（預設隱藏）
+        gbc.gridx = 2;
+        JSpinner fromDateSpinner = new JSpinner(new SpinnerDateModel());
+        fromDateSpinner.setEditor(new JSpinner.DateEditor(fromDateSpinner, "yyyy/MM/dd"));
+        fromDateSpinner.setVisible(false);
+        panel.add(fromDateSpinner, gbc);
 
-        // 結束時間下拉選單 Label + ComboBox
-        gbc.gridx = 0; gbc.gridy = 3;
-        panel.add(new JLabel("結束時間:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3;
-        JComboBox<String> endTimeComboBox = new JComboBox<>(times);
-        panel.add(endTimeComboBox, gbc);
+        // 到
+        gbc.gridx = 0; gbc.gridy++;
+        panel.add(new JLabel("到:"), gbc);
+        gbc.gridx = 1;
+        String[] toOptions = {"永久(3個月)", "本事件結束", "某月某日"};
+        JComboBox<String> toComboBox = new JComboBox<>(toOptions);
+        panel.add(toComboBox, gbc);
 
-        // 每次持續多久下拉選單 Label + ComboBox
-        gbc.gridx = 0; gbc.gridy = 4;
-        panel.add(new JLabel("每次持續:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4;
-        String[] durations = {"15 分鐘", "30 分鐘", "45 分鐘", "60 分鐘"};
+        // 到日期選擇器（預設隱藏）
+        gbc.gridx = 2;
+        JSpinner toDateSpinner = new JSpinner(new SpinnerDateModel());
+        toDateSpinner.setEditor(new JSpinner.DateEditor(toDateSpinner, "yyyy/MM/dd"));
+        toDateSpinner.setVisible(false);
+        panel.add(toDateSpinner, gbc);
+
+        // 最多幾次
+        gbc.gridx = 0; gbc.gridy++;
+        panel.add(new JLabel("最多幾次:"), gbc);
+        gbc.gridx = 1;
+        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(1, 1, 10, 1);
+        JSpinner repeatSpinner = new JSpinner(spinnerModel);
+        panel.add(repeatSpinner, gbc);
+
+        // 每次持續多久
+        gbc.gridx = 0; gbc.gridy++;
+        panel.add(new JLabel("每次:"), gbc);
+        gbc.gridx = 1;
+        String[] durations = {"15分鐘", "30分鐘", "1小時", "3小時"};
         JComboBox<String> durationComboBox = new JComboBox<>(durations);
         panel.add(durationComboBox, gbc);
 
         // 按鈕
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         JButton arrangeButton = new JButton("安排");
         panel.add(arrangeButton, gbc);
 
-        // 按鈕事件
-        arrangeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String eventName = eventNameField.getText();
-                String schedule = (String) scheduleComboBox.getSelectedItem();
-                String startTime = (String) startTimeComboBox.getSelectedItem();
-                String endTime = (String) endTimeComboBox.getSelectedItem();
-                String duration = (String) durationComboBox.getSelectedItem();
+        // 根據選擇顯示日期選擇器
+        fromComboBox.addActionListener(e -> {
+            String selected = (String) fromComboBox.getSelectedItem();
+            fromDateSpinner.setVisible("某月某日".equals(selected));
+            pack();
+        });
 
-                JOptionPane.showMessageDialog(AIArrangeUI.this,
-                        "事件: " + eventName + "\n"
-                                + "行程: " + schedule + "\n"
-                                + "時間: " + startTime + " ~ " + endTime + "\n"
-                                + "每次持續: " + duration,
-                        "安排完成",
-                        JOptionPane.INFORMATION_MESSAGE);
+        toComboBox.addActionListener(e -> {
+            String selected = (String) toComboBox.getSelectedItem();
+            toDateSpinner.setVisible("某月某日".equals(selected));
+            pack();
+        });
+
+        // 安排事件邏輯
+        arrangeButton.addActionListener(e -> {
+            String eventName = eventNameField.getText().trim();
+            if (eventName.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "請輸入事件名稱！");
+                return;
             }
+
+            String option = (String) eventComboBox.getSelectedItem();
+            String from = (String) fromComboBox.getSelectedItem();
+            String to = (String) toComboBox.getSelectedItem();
+
+            if (from.equals("本事件開始") && to.equals("本事件結束")) {
+                JOptionPane.showMessageDialog(null, "開始與結束不能都選本事件！");
+                return;
+            }
+
+            int times = (Integer) repeatSpinner.getValue();
+            String duration = (String) durationComboBox.getSelectedItem();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+            String fromDateStr = from.equals("某月某日") ? sdf.format((Date) fromDateSpinner.getValue()) : from;
+            String toDateStr = to.equals("某月某日") ? sdf.format((Date) toDateSpinner.getValue()) : to;
+
+            JOptionPane.showMessageDialog(null,
+                    "事件名稱: " + eventName + "\n" +
+                            "選項: " + option + "\n" +
+                            "從: " + fromDateStr + "\n" +
+                            "到: " + toDateStr + "\n" +
+                            "最多次數: " + times + "\n" +
+                            "每次: " + duration,
+                    "安排成功", JOptionPane.INFORMATION_MESSAGE);
         });
 
         add(panel);
+        setVisible(true);
     }
 }
