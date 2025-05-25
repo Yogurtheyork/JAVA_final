@@ -12,6 +12,7 @@ public class ActiveUI {
     public static final JPanel calendarPanel = new JPanel(new BorderLayout());
     public static final JPanel chatRoomPanel = new JPanel(new BorderLayout());
     public static final JPanel functionPanel = new JPanel(); // 左邊放功能按鈕的panel
+    private static Curriculum curriculumWindow = null;
 
     public ActiveUI() {
         // 先設定主視窗 Layout
@@ -106,7 +107,7 @@ public class ActiveUI {
         toolsPanel.setLayout(new GridLayout(2, 3, 5, 5));
         toolsPanel.setVisible(false);
 
-        JButton tool1 = new JButton("T1");
+        JButton tool1 = new JButton("課表");
         JButton tool2 = new JButton("T2");
         JButton tool3 = new JButton("T3");
         JButton tool4 = new JButton("T4");
@@ -119,6 +120,14 @@ public class ActiveUI {
         toolsPanel.add(tool4);
         toolsPanel.add(tool5);
         toolsPanel.add(tool6);
+        tool1.addActionListener(e -> {
+            if (curriculumWindow == null || !curriculumWindow.isDisplayable()) {
+                curriculumWindow = new Curriculum();
+                curriculumWindow.setVisible(true);
+            } else {
+                curriculumWindow.toFront();
+            }
+        });
 
         bottomPanel.add(toolsPanel, BorderLayout.CENTER);
         functionPanel.add(bottomPanel);
