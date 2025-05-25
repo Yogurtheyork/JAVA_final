@@ -20,7 +20,6 @@ public class Curriculum extends JFrame {
 
     public Curriculum() {
         setTitle("課程表排程系統");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
         // 初始化組件
@@ -213,9 +212,5 @@ public class Curriculum extends JFrame {
                 courseFields[i][j].setText("");
             }
         }
-    }
-
-    private  void  sendToGPT() {
-        //TODO
     }
 }
