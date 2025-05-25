@@ -848,30 +848,55 @@ public class CalendarUI extends JPanel implements ActionListener {
     }
 
     private void showWeekEventDialog(LocalDate date, String time) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) + " " + time + " 事件", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) + " " + time + " 事件", true);
         dialog.setLayout(new BorderLayout());
-        dialog.setSize(400, 300);
+        dialog.setSize(450, 250);
         dialog.setLocationRelativeTo(this);
 
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        inputPanel.add(new JLabel("事件名稱:"));
-        JTextField titleField = new JTextField();
-        inputPanel.add(titleField);
+        // Row 0: 事件名稱
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(new JLabel("事件名稱:"), gbc);
 
-        inputPanel.add(new JLabel("開始時間:"));
-        JTextField timeFieldStart = new JTextField(time);
-        inputPanel.add(timeFieldStart);
+        gbc.gridx = 1;
+        gbc.gridwidth = 3;
+        JTextField titleField = new JTextField(20);
+        inputPanel.add(titleField, gbc);
 
-        inputPanel.add(new JLabel("結束時間:"));
-        JTextField timeFieldEnd = new JTextField(time);
-        inputPanel.add(timeFieldEnd);
+        // Row 1: 開始時間 + 結束時間 同一行
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        inputPanel.add(new JLabel("開始時間:"), gbc);
 
-        inputPanel.add(new JLabel("備註:"));
-        JTextField descField = new JTextField();
-        inputPanel.add(descField);
+        gbc.gridx = 1;
+        JTextField timeFieldStart = new JTextField(time, 8);
+        inputPanel.add(timeFieldStart, gbc);
 
+        gbc.gridx = 2;
+        inputPanel.add(new JLabel("結束時間:"), gbc);
+
+        gbc.gridx = 3;
+        JTextField timeFieldEnd = new JTextField(time, 8);
+        inputPanel.add(timeFieldEnd, gbc);
+
+        // Row 2: 備註
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+        inputPanel.add(new JLabel("備註:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 3;
+        JTextField descField = new JTextField(20);
+        inputPanel.add(descField, gbc);
+
+        // Button Panel
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
@@ -888,8 +913,8 @@ public class CalendarUI extends JPanel implements ActionListener {
 
             CalendarEvent newEvent = new CalendarEvent(
                     titleField.getText(),
-                    date, // startDate
-                    date, // endDate (與 startDate 相同，表示單日)
+                    date,
+                    date,
                     timeFieldStart.getText(),
                     timeFieldEnd.getText(),
                     descField.getText()
@@ -911,6 +936,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
 
 
     // Year view implementation
