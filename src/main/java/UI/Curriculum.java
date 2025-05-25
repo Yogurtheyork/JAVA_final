@@ -19,6 +19,7 @@ public class Curriculum extends JFrame {
     private JTextField planNameField;
 
     public Curriculum() {
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setTitle("課程表排程系統");
         setLayout(new BorderLayout(10, 10));
 
