@@ -443,13 +443,15 @@ public class CalendarUI extends JPanel implements ActionListener {
         JTextField startDateField = new JTextField();
         inputPanel.add(startDateField);
 
+        inputPanel.add(new JLabel("開始時間 (HH:mm):"));
+        JTextField timeFieldStart = new JTextField();
+        inputPanel.add(timeFieldStart);
+
         inputPanel.add(new JLabel("結束日期 (YYYY-MM-DD):"));
         JTextField endDateField = new JTextField();
         inputPanel.add(endDateField);
 
-        inputPanel.add(new JLabel("開始時間 (HH:mm):"));
-        JTextField timeFieldStart = new JTextField();
-        inputPanel.add(timeFieldStart);
+
 
         inputPanel.add(new JLabel("結束時間 (HH:mm):"));
         JTextField timeFieldEnd = new JTextField();
