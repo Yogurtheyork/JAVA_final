@@ -22,7 +22,7 @@ public class UserSetting extends JFrame {
     public UserSetting() {
         setTitle("使用者設定");
         setSize(300, 250);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new GridLayout(5, 1));
 
