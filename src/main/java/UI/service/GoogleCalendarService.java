@@ -1,4 +1,4 @@
-package GoogleCalendar.service;
+package UI.service;
 
 import com.google.api.services.calendar.model.Event;
 

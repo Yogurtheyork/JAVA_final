@@ -14,7 +14,7 @@ public class ActiveUI {
     public static final JPanel functionPanel = new JPanel(); // 左邊放功能按鈕的panel
     private static Curriculum curriculumWindow = null;
 
-    public ActiveUI() {
+    public ActiveUI() throws Exception {
         // 先設定主視窗 Layout
         mainFrame.setLayout(new BorderLayout());
 

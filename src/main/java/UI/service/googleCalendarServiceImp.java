@@ -1,6 +1,5 @@
-package GoogleCalendar.service;
+package UI.service;
 
-import UI.service.GoogleCalendarService;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -15,16 +14,13 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
-public class GoogleCalendarServiceImpl implements GoogleCalendarService {
+public class googleCalendarServiceImp implements GoogleCalendarService {
     private static final String APPLICATION_NAME = "Google Calendar Service";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
@@ -33,7 +29,7 @@ public class GoogleCalendarServiceImpl implements GoogleCalendarService {
 
     private final Calendar calendarService;
 
-    public GoogleCalendarServiceImpl() throws Exception {
+    public googleCalendarServiceImp() throws Exception {
         this.calendarService = initializeCalendarService();
     }
 

@@ -1,8 +1,8 @@
 package UI;
 
-import UI.controller.CalendarController;
-import UI.service.EventService;
-import UI.view.CalendarView;
+import UI.service.GoogleCalendarService;
+import UI.service.googleCalendarServiceImp;
+//import UI.view.CalendarView;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,6 +23,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import com.google.api.services.calendar.model.Event;
 
 public class CalendarUI extends JPanel implements ActionListener {
 
@@ -46,27 +47,23 @@ public class CalendarUI extends JPanel implements ActionListener {
     private ViewMode currentView = ViewMode.MONTH; // Default view
 
     // Event management
-    private final List<CalendarEvent> events = new ArrayList<>();
-    private static final String EVENT_FILE = "src/main/resources/calendar_events.json";
+    private final List<Event> events = new ArrayList<>();
+    private static final String EVENT_FILE = "src/main/resources/events.json";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-    private CalendarView calendarView;
-    private CalendarController controller;
+    private GoogleCalendarService calendarService;
 
     //constructor
-    public CalendarUI() {
+    public CalendarUI() throws Exception {
         initComponents();
         setupUI();
         loadEvents();
         setToday();
     }
 
-    private void initComponents() {
-        EventService eventService = new EventService();
-        controller = new CalendarController(eventService, null); // Initialize controller first
-        calendarView = new CalendarView(eventService, controller); // Then create view with controller
-        controller.setView(calendarView); // Set the view in controller
+    private void initComponents() throws Exception {
+        calendarService = new googleCalendarServiceImp();
     }
 
     private void setupUI() {
@@ -114,8 +111,14 @@ public class CalendarUI extends JPanel implements ActionListener {
         btnDeleteEvent.setFont(new Font("微軟正黑體", Font.BOLD, 16));
         btnDeleteEvent.addActionListener(e -> {
             LocalDate date = LocalDate.of(currentYear, currentMonth, currentDay);
-            List<CalendarEvent> dayEvents = getEventsForDate(date);
-            if (!dayEvents.isEmpty()) {
+            List<Event> dayEvents = null;
+            try {
+                dayEvents = calendarService.fetchEvents();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+
+            /*if (!dayEvents.isEmpty()) {
                 if (JOptionPane.showConfirmDialog(this, "確定要刪除今天的所有事件嗎？", "確認", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     events.removeIf(ev -> ev.getStartDate() .equals(date));
                     saveEvents();
@@ -127,7 +130,7 @@ public class CalendarUI extends JPanel implements ActionListener {
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "今天沒有事件可以刪除");
-            }
+            }*/
         });
 
         jp_search.add(btnAddEvent);
@@ -189,8 +192,8 @@ public class CalendarUI extends JPanel implements ActionListener {
         }, 0, 1000);
     }
 
-    // Event class to store calendar events
-    public static class CalendarEvent {
+    /// E ///
+    /*public static class CalendarEvent {
         private String title;
         private LocalDate startDate;
         private LocalDate endDate;
@@ -261,7 +264,9 @@ public class CalendarUI extends JPanel implements ActionListener {
         public String getDescription() { return description; }
         public String getGoogleCalendarId() { return googleCalendarId; }
         public void setGoogleCalendarId(String id) { this.googleCalendarId = id; }
-    }
+    }*/
+
+
 
     private void initializeMonthView() {
         calendarPanel.removeAll();
@@ -315,12 +320,13 @@ public class CalendarUI extends JPanel implements ActionListener {
         calendarPanel.repaint();
     }
 
-    private void showEventDialog(int day) {
+    /// E ///
+    /*private void showEventDialog(int day) {
         // Create dialog for adding/editing events
         LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, day);
 
         // Get existing events for this day
-        List<CalendarEvent> dayEvents = getEventsForDate(selectedDate);
+        List<Event> dayEvents = getEventsForDate(selectedDate);
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), currentYear + "年" + currentMonth + "月" + day + "日 事件管理", true);
         dialog.setLayout(new BorderLayout());
@@ -423,9 +429,10 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.add(splitPane, BorderLayout.CENTER);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
-    }
+    }*/
 
 
+    /// E ///
     private void addNewEvent(LocalDate ignoredDate) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "新增事件 (可跨天)", true);
         dialog.setLayout(new BorderLayout());
@@ -435,65 +442,48 @@ public class CalendarUI extends JPanel implements ActionListener {
         JPanel inputPanel = new JPanel(new GridLayout(6, 2, 5, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Summery
         inputPanel.add(new JLabel("事件名稱:"));
-        JTextField titleField = new JTextField();
-        inputPanel.add(titleField);
+        JTextField summeryField = new JTextField();
+        inputPanel.add(summeryField);
 
+        // Location
+        inputPanel.add(new JLabel("地點:"));
+        JTextField locField = new JTextField();
+        inputPanel.add(locField);
+
+
+        // Description
+        inputPanel.add(new JLabel("備註:"));
+        JTextField descField = new JTextField();
+        inputPanel.add(descField);
+
+        // Start time
         inputPanel.add(new JLabel("開始日期 (YYYY-MM-DD):"));
         JTextField startDateField = new JTextField();
         inputPanel.add(startDateField);
 
-        inputPanel.add(new JLabel("開始時間 (HH:mm):"));
-        JTextField timeFieldStart = new JTextField();
-        inputPanel.add(timeFieldStart);
-
+        // End time
         inputPanel.add(new JLabel("結束日期 (YYYY-MM-DD):"));
         JTextField endDateField = new JTextField();
         inputPanel.add(endDateField);
 
 
-
-        inputPanel.add(new JLabel("結束時間 (HH:mm):"));
-        JTextField timeFieldEnd = new JTextField();
-        inputPanel.add(timeFieldEnd);
-
-        inputPanel.add(new JLabel("備註:"));
-        JTextField descField = new JTextField();
-        inputPanel.add(descField);
-
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
+
+        // Action Listener for save button
         saveButton.addActionListener(e -> {
             try {
-                String title = titleField.getText().trim();
-                LocalDate startDate = LocalDate.parse(startDateField.getText(), DATE_FORMAT);
-                LocalDate endDate = LocalDate.parse(endDateField.getText(), DATE_FORMAT);
-
-                if (title.isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
-                    return;
-                }
-
-                CalendarEvent newEvent = new CalendarEvent(
-                        title,
-                        startDate,
-                        endDate,
-                        timeFieldStart.getText(),
-                        timeFieldEnd.getText(),
-                        descField.getText()
-                );
-
-                events.add(newEvent);
-                saveEvents();
-                if (currentView == ViewMode.WEEK) {
-                    showWeekView();
-                } else {
-                    showCalendar(currentYear, currentMonth);
-                }
-                dialog.dispose();
-
+                calendarService.insertEvent(calendarService.createEvent(
+                            summeryField.getText().trim(),
+                            locField.getText(),
+                            descField.getText(),
+                            startDateField.getText(),
+                            endDateField.getText()
+                    ));
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "日期格式錯誤，請使用 YYYY-MM-DD");
+                throw new RuntimeException(ex);
             }
         });
 
@@ -508,8 +498,8 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.setVisible(true);
     }
 
-
-    private void editEvent(CalendarEvent event) {
+    /// E ///
+    private void editEvent(Event event) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "編輯事件", true);
         dialog.setLayout(new BorderLayout());
         dialog.setSize(400, 300);
@@ -520,8 +510,8 @@ public class CalendarUI extends JPanel implements ActionListener {
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         inputPanel.add(new JLabel("事件名稱:"));
-        JTextField titleField = new JTextField(event.getTitle());
-        inputPanel.add(titleField);
+        JTextField summeryField = new JTextField(event.getSummary());
+        inputPanel.add(summeryField);
 
         inputPanel.add(new JLabel("事件開始時間:"));
         JTextField timeFieldStart = new JTextField("HH:MM");
@@ -539,7 +529,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("保存");
         saveButton.addActionListener(e -> {
-            if (titleField.getText().trim().isEmpty()) {
+            if (summeryField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "請輸入事件名稱");
                 return;
             }
@@ -547,14 +537,13 @@ public class CalendarUI extends JPanel implements ActionListener {
             // Update the event
             events.remove(event);
 
-            CalendarEvent updatedEvent = new CalendarEvent(
-                    titleField.getText(),
-                    event.getStartDate(),
-                    event.getEndDate(),
-                    timeFieldStart.getText(),
-                    timeFieldEnd.getText(),
+            Event updatedEvent = calendarService.createEvent(
+                    summeryField.getText(),
+                    timeFieldStart,
+                    timeFieldEnd,
+
                     descField.getText()
-            );
+            );*/
 
             // Preserve Google Calendar ID if exists
             if (!event.getGoogleCalendarId().isEmpty()) {
@@ -581,6 +570,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
 
     private void setToday() {
         int year = LocalDate.now().getYear();
@@ -745,6 +735,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         return firstWeekOfMonth;
     }
 
+    /// E ///
     private void addDeleteAllButton(JPanel searchPanel) {
         JButton btnDeleteAllEvents = new JButton("刪除所有行程");
         btnDeleteAllEvents.setFont(new Font("微軟正黑體", Font.BOLD, 16));
@@ -762,6 +753,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         });
         searchPanel.add(btnDeleteAllEvents);
     }
+
     // Week view implementation
     private void showWeekView() {
         calendarPanel.removeAll();
@@ -847,6 +839,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         calendarPanel.repaint();
     }
 
+    /// M ///
     private void showWeekEventDialog(LocalDate date, String time) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) + " " + time + " 事件", true);
@@ -937,13 +930,12 @@ public class CalendarUI extends JPanel implements ActionListener {
         dialog.setVisible(true);
     }
 
-
-
     // Year view implementation
     private void showYearView() {
         showYearView(currentYear);
     }
 
+    /// M ///
     private void showYearView(int year) {
         currentYear = year;
         calendarPanel.removeAll();
@@ -968,6 +960,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         calendarPanel.revalidate();
         calendarPanel.repaint();
     }
+
 
     private JPanel createMiniMonth(int year, int month) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -1063,7 +1056,7 @@ public class CalendarUI extends JPanel implements ActionListener {
     }
 
     // JSON Event Storage Methods
-
+    /// E ///
     private void loadEvents() {
         JSONParser parser = new JSONParser();
         events.clear();
@@ -1092,7 +1085,7 @@ public class CalendarUI extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, "無法載入事件資料: " + e.getMessage());
         }
     }
-
+    /// E ///
     private void saveEvents() {
         JSONArray jsonEvents = new JSONArray();
         for (CalendarEvent event : events) {
@@ -1113,6 +1106,7 @@ public class CalendarUI extends JPanel implements ActionListener {
 
     // Helper methods for event management
 
+    /// M ///
     private List<CalendarEvent> getEventsForDate(LocalDate date) {
         List<CalendarEvent> result = new ArrayList<>();
         for (CalendarEvent event : events) {
@@ -1124,6 +1118,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         return result;
     }
 
+    /// M ///
     private int countEventsInMonth(int year, int month) {
         int count = 0;
         LocalDate startDate = LocalDate.of(year, month, 1);
@@ -1140,7 +1135,7 @@ public class CalendarUI extends JPanel implements ActionListener {
         return count;
     }
 
-    // Custom renderer for schedule cells (week view)
+    /// M /// Custom renderer for schedule cells (week view)
     private static class ScheduleCellRenderer extends JTextArea implements TableCellRenderer {
         public ScheduleCellRenderer() {
             setWrapStyleWord(true);

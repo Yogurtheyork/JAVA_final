@@ -1,6 +1,6 @@
 package GoogleCalendar;
 
-import GoogleCalendar.service.GoogleCalendarService;
+import UI.service.GoogleCalendarService;
 import GoogleCalendar.service.GoogleCalendarServiceImpl;
 import GoogleCalendar.util.JsonUtil;
 import com.google.api.services.calendar.model.Event;
@@ -28,7 +28,8 @@ public class GoogleCalendarFetcher {
         }
 
         // Fetch events from events.json
-        List<Event> events = calendarService.fetchEvents();
+        List<Event> events = events = calendarService.fetchEvents();
+
         if (events.isEmpty()) {
             System.out.println("找不到行程");
         } else {
