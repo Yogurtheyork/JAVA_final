@@ -10,6 +10,7 @@ import java.util.*;
 
 public class Curriculum extends JFrame {
     private static final String[] DAYS = {"週一", "週二", "週三", "週四", "週五", "週六", "週日"};
+
     private static final int MAX_PERIODS = 14; // 第0節到第13節
 
     private JPanel timePanel;

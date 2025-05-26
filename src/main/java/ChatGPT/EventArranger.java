@@ -25,7 +25,7 @@ public class EventArranger {
     public void arrangeEvents(String prompt) {
         try {
             String response = chatGPT.chat(prompt);
-            System.out.println("AI Response: " + response);
+            System.out.println("AI Response: " + response);//TODO
         } catch (IOException e) {
             e.printStackTrace();
         }

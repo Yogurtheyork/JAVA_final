@@ -16,18 +16,18 @@ public class UserSetting extends JFrame {
     private JComboBox<String> sizeComboBox;
     private JCheckBox autoStartCheckBox;
     private static final String FILE_PATH = "src/main/resources/userSetting.json";
-    private static final Setting DEFAULT_SETTING = new Setting("繁體中文", "Normal", true);
+    private static final Setting DEFAULT_SETTING = new Setting("en", "Normal", true);
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public UserSetting() {
-        setTitle("使用者設定");
+        setTitle("User Setting");
         setSize(300, 250);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new GridLayout(5, 1));
 
         // 語言選單
-        languageComboBox = new JComboBox<>(new String[]{"English", "繁體中文"});
+        languageComboBox = new JComboBox<>(new String[]{"en", "zh"});
 
         add(createPanel("Language:", languageComboBox));
 
@@ -38,14 +38,16 @@ public class UserSetting extends JFrame {
         // 開機啟動勾選
         autoStartCheckBox = new JCheckBox("開機時啟動");
 
+        /*
         JPanel autoPanel = new JPanel();
         autoPanel.add(autoStartCheckBox);
         add(autoPanel);
+        */
 
         // 按鈕區
         JPanel buttonPanel = new JPanel();
-        JButton saveButton = new JButton("儲存");
-        JButton defaultButton = new JButton("返回預設");
+        JButton saveButton = new JButton("save");
+        JButton defaultButton = new JButton("default");
 
         buttonPanel.add(saveButton);
         buttonPanel.add(defaultButton);
