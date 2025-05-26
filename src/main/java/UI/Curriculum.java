@@ -2,14 +2,17 @@ package UI;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class Curriculum extends JFrame {
     private static final String[] DAYS = {"週一", "週二", "週三", "週四", "週五", "週六", "週日"};
+
     private static final int MAX_PERIODS = 14; // 第0節到第13節
 
     private JPanel timePanel;
@@ -116,91 +119,11 @@ public class Curriculum extends JFrame {
     }
 
     private void savePlan() {
-        if (planNameField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "請輸入方案名稱！", "錯誤", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("保存課程表");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("課程表文件 (*.csv)", "csv"));
-        fileChooser.setSelectedFile(new File(planNameField.getText() + ".csv"));
-
-        int userSelection = fileChooser.showSaveDialog(this);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-
-            try (PrintWriter writer = new PrintWriter(fileToSave)) {
-                // 保存方案名稱
-                writer.println("Plan Name," + planNameField.getText());
-
-                // 保存時間設定
-                for (int i = 0; i < MAX_PERIODS; i++) {
-                    writer.println("Time," + i + "," + timeFields[i].getText());
-                }
-
-                // 保存課程
-                for (int i = 0; i < MAX_PERIODS; i++) {
-                    for (int j = 0; j < DAYS.length; j++) {
-                        String course = courseFields[i][j].getText();
-                        if (!course.isEmpty()) {
-                            writer.println("Course," + i + "," + j + "," + course);
-                        }
-                    }
-                }
-
-                JOptionPane.showMessageDialog(this, "課程表已保存至 " + fileToSave.getName(),
-                        "保存成功", JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "保存失敗: " + ex.getMessage(),
-                        "錯誤", JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }
 
     private void loadPlan() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("載入課程表");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("課程表文件 (*.csv)", "csv"));
 
-        int userSelection = fileChooser.showOpenDialog(this);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToLoad = fileChooser.getSelectedFile();
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(fileToLoad))) {
-                // 清空現有數據
-                clearSchedule();
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",", 4);
-
-                    if (parts[0].equals("Plan Name") && parts.length >= 2) {
-                        planNameField.setText(parts[1]);
-                    } else if (parts[0].equals("Time") && parts.length >= 3) {
-                        int periodIndex = Integer.parseInt(parts[1]);
-                        if (periodIndex >= 0 && periodIndex < MAX_PERIODS) {
-                            timeFields[periodIndex].setText(parts[2]);
-                        }
-                    } else if (parts[0].equals("Course") && parts.length >= 4) {
-                        int periodIndex = Integer.parseInt(parts[1]);
-                        int dayIndex = Integer.parseInt(parts[2]);
-                        if (periodIndex >= 0 && periodIndex < MAX_PERIODS &&
-                                dayIndex >= 0 && dayIndex < DAYS.length) {
-                            courseFields[periodIndex][dayIndex].setText(parts[3]);
-                        }
-                    }
-                }
-
-                JOptionPane.showMessageDialog(this, "課程表已載入",
-                        "載入成功", JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (IOException | NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "載入失敗: " + ex.getMessage(),
-                        "錯誤", JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }
 
     private void clearSchedule() {
