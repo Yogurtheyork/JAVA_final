@@ -4,12 +4,15 @@ import ChatGPT.ChatGPT;
 import ChatGPT.Prompt.EventPrompt;
 import UI.service.EventService;
 import io.github.cdimascio.dotenv.Dotenv;
-
+import com.google.gson.*;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class EventArranger {
     private ChatGPT chatGPT;
     private EventService eventService;
+    private EventPrompt eventPrompt = new EventPrompt();
+    private final String EventPATH = "src/main/resources/event.json";
 
     public EventArranger() {
         Dotenv dotenv = Dotenv.load();
@@ -25,7 +28,12 @@ public class EventArranger {
     public void arrangeEvents(String prompt) {
         try {
             String response = chatGPT.chat(prompt);
-            System.out.println("AI Response: " + response);//TODO
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement jsonElement = JsonParser.parseString(response);
+            FileWriter writer = new FileWriter(EventPATH);
+            gson.toJson(jsonElement, writer);
+            writer.close();
+            System.out.println("事件安排完成");
         } catch (IOException e) {
             e.printStackTrace();
         }

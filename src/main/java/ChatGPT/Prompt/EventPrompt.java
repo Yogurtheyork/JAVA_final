@@ -1,8 +1,5 @@
 package ChatGPT.Prompt;
 
-// Language
-import Language.LanguageConfig;
-
 // Json
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,6 +14,7 @@ public class EventPrompt {
     private String Start;
     private String Learning;
     private String Review;
+    private String Curriculum;
     private String Project;
     private String End;
 
@@ -25,7 +23,6 @@ public class EventPrompt {
     private String times = "any";
     private String duration = "15 minutes";
 
-
     public EventPrompt(){
         String languageFile = "language/English/EventPrompt.json";
         try (FileReader reader = new FileReader(languageFile)) {
@@ -33,6 +30,7 @@ public class EventPrompt {
             Start = jsonObject.get("Start").getAsString();
             Learning = jsonObject.get("Learning").getAsString();
             Review = jsonObject.get("Review").getAsString();
+            Curriculum = jsonObject.get("Curriculum").getAsString();
             Project = jsonObject.get("Project").getAsString();
             End = jsonObject.get("End").getAsString();
         } catch (IOException e) {
@@ -54,18 +52,18 @@ public class EventPrompt {
 
     //讓AI安排複習時間
     public String ReviewPrompt (String PATH){
-        String prompt = this.Start + this.jsonToString(PATH) + this.Review + this.getTime() + this.End;
+        String CURRICULUMPATH = "src/main/resources/curriculum.csv";
+        String prompt = this.Start + this.jsonToString(PATH) + this.Curriculum + CSVToString(CURRICULUMPATH) + this.Review + this.getTime() + this.End;
         return prompt;
     }
-
     //讓AI安排學習計畫
     public String LearningPrompt (String PATH){
-        String prompt = Start + this.jsonToString(PATH) + Learning + this.getTime() + End;
+        String prompt = this.Start + this.jsonToString(PATH) + Learning + this.getTime() + End;
         return prompt;
     }
-
+    //讓AI安排專案規劃
     public String ProjectPrompt (String PATH){
-        String prompt = Start + this.jsonToString(PATH) + Project + this.getTime() + End;
+        String prompt = this.Start + this.jsonToString(PATH) + Project + this.getTime() + End;
         return prompt;
     }
 
@@ -78,4 +76,15 @@ public class EventPrompt {
         }
         return "nothing";
     }
+
+    public String CSVToString (String PATH){
+        try {
+            String content = Files.readString(Paths.get(PATH)); // Java 11+
+            return content;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "nothing";
+    }
+
 }
