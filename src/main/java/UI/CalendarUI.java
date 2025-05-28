@@ -24,6 +24,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+
 public class CalendarUI extends JPanel implements ActionListener {
 
     private static JLabel TaiwanTime;
@@ -60,6 +66,11 @@ public class CalendarUI extends JPanel implements ActionListener {
         setupUI();
         loadEvents();
         setToday();
+        checkTodayEvents();
+        // 初始化完成後，加上每天通知的定時任務：
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(() -> SwingUtilities.invokeLater(this::checkTodayEvents),
+                0, 1, TimeUnit.DAYS);
     }
 
     private void initComponents() {
@@ -262,6 +273,28 @@ public class CalendarUI extends JPanel implements ActionListener {
         public String getGoogleCalendarId() { return googleCalendarId; }
         public void setGoogleCalendarId(String id) { this.googleCalendarId = id; }
     }
+
+    private void checkTodayEvents() {
+        LocalDate today = LocalDate.now();
+        List<CalendarEvent> todayEvents = events.stream()
+                .filter(e -> !e.getStartDate().isAfter(today) && !e.getEndDate().isBefore(today))
+                .collect(Collectors.toList());
+
+        if (!todayEvents.isEmpty()) {
+            StringBuilder message = new StringBuilder("您今天有以下事件：\n");
+            for (CalendarEvent event : todayEvents) {
+                message.append("- ").append(event.getTitle())
+                        .append("（").append(event.getStart()).append(" ~ ").append(event.getEnd()).append("）\n");
+            }
+
+            // ✅ 用 ActiveUI.mainFrame 當 parent
+            JOptionPane.showMessageDialog(ActiveUI.mainFrame, message.toString(), "行程提醒", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+
+
+
 
     private void initializeMonthView() {
         calendarPanel.removeAll();
