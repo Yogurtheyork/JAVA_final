@@ -73,7 +73,7 @@ public class YearView extends JPanel {
             monthBtn.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     LocalDate selectedDate = LocalDate.of(currentYear, month, 1);
-                    controller.handleDateSelected(selectedDate);
+                    controller.handleMonthSelected(selectedDate);
                 }
             });
             monthsPanel.add(monthBtn);

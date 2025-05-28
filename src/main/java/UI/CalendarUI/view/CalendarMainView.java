@@ -22,6 +22,9 @@ public class CalendarMainView extends JPanel {
         tabbedPane.addTab("Week", new WeekView(controller));
         tabbedPane.addTab("Year", new YearView(controller));
 
+        controller.setSwitchToMonthViewHandler(date -> tabbedPane.setSelectedIndex(0)); // Month tab index
+        controller.setSwitchToWeekViewHandler(date -> tabbedPane.setSelectedIndex(1)); // Week tab index
+
         this.add(tabbedPane, BorderLayout.CENTER);
     }
 

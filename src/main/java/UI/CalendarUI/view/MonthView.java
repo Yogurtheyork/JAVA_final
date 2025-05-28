@@ -86,7 +86,7 @@ public class MonthView extends JPanel {
                     String dayText = dayLabel.getText();
                     if (!dayText.isEmpty()) {
                         LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, Integer.parseInt(dayText));
-                        controller.handleDateSelected(selectedDate);
+                        controller.handleDaySelected(selectedDate);
                     }
                 }
             }

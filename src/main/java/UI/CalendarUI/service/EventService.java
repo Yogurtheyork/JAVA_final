@@ -7,23 +7,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class EventService {
+public class EventService extends GoogleCalendarServiceImp{
 
-    private final GoogleCalendarService googleService;
-
-    public EventService(GoogleCalendarService googleService) {
-        this.googleService = googleService;
+    public EventService() throws Exception {
+        super();
     }
 
     public List<Event> getEventsOnDate(LocalDate date) {
-        return googleService.getEventsForDate(date);
+        return getEventsForDate(date);
     }
 
-    public void addEvent(String title, String description, LocalDate date) {
+    /*public void addEvent(String title, String description, LocalDate date) {
         DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         String start = date.atStartOfDay().format(fmt);
         String end = date.plusDays(1).atStartOfDay().format(fmt);
-        // location 暫留空，符合介面簽章
-        googleService.createEvent(title, "", description, start, end);
-    }
+
+        createEvent(title, "", description, start, end);
+    }*/
 }

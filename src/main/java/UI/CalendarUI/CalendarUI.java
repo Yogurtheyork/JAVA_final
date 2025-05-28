@@ -16,9 +16,8 @@ public class CalendarUI extends JPanel {
         setLayout(new BorderLayout());
 
         // 初始化 MVC 元件
-        GoogleCalendarService googleCalendarService = new GoogleCalendarServiceImp();
         CalendarModel model = new CalendarModel();
-        EventService eventService = new EventService(googleCalendarService);
+        EventService eventService = new EventService();
         CalendarController controller = new CalendarController(model, eventService);
         controller.setParentComponent(this);
 
