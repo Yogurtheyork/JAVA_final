@@ -10,11 +10,12 @@ import java.io.IOException;
 
 public class EventArranger {
     private ChatGPT chatGPT;
-    private EventService eventService;
-    private EventPrompt eventPrompt = new EventPrompt();
+    private EventPrompt eventPrompt;
+    private String prompt;
     private final String EventPATH = "src/main/resources/event.json";
+    private String eventTitle = "nothing";
 
-    public EventArranger() {
+    public EventArranger(int selection, String begin, String finish, String times, String duration) {
         Dotenv dotenv = Dotenv.load();
         String apiKey = dotenv.get("OPENAI_API_KEY");
         if (apiKey == null || apiKey.isEmpty()) {
@@ -22,10 +23,25 @@ public class EventArranger {
             System.exit(1);
         }
         chatGPT = new ChatGPT(apiKey);
-        eventService = new EventService();
+
+        this.eventPrompt = new EventPrompt(eventTitle);
+        eventPrompt.setTime(begin, finish, times, duration);
+        switch (selection){
+            case 0: // 安排學習計畫
+                this.prompt = eventPrompt.LearningPrompt();
+                break;
+            case 1: // 安排複習考試
+                this.prompt = eventPrompt.ReviewPrompt();
+                break;
+            case 2: // 安排專案進度
+                this.prompt = eventPrompt.ProjectPrompt();
+                break;
+            default:
+                System.out.println("無效的選擇");
+        }
     }
 
-    public void arrangeEvents(String prompt) {
+    public void arrangeEvents() {
         try {
             String response = chatGPT.chat(prompt);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
