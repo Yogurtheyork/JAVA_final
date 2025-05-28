@@ -26,10 +26,11 @@ public class EventPrompt {
 
     private final String EVENTPATH = "src/main/resources/event.json";
 
-    public EventPrompt(){
+    public EventPrompt(String eventTitle) {
         String languageFile = "language/English/EventPrompt.json";
         try (FileReader reader = new FileReader(languageFile)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            setEventTitle(eventTitle);
             Start = jsonObject.get("Start").getAsString();
             Learning = jsonObject.get("Learning").getAsString();
             Review = jsonObject.get("Review").getAsString();
@@ -56,12 +57,11 @@ public class EventPrompt {
         this.times = times;
         this.duration = duration;
     }
-
+    //時間組合成prompt字串
     public String getTime(){
         String returnTime = "Please arrange [" + this.times + "] times events from [" + this.begin + "] to [" + this.finish + "] everytimes for [" + this.duration + "].";
         return returnTime;
     }
-
     //讓AI安排複習時間
     public String ReviewPrompt (){
         String CURRICULUMPATH = "src/main/resources/curriculum.csv";
@@ -78,7 +78,7 @@ public class EventPrompt {
         String prompt = this.Start + this.jsonToString() + Project + this.getEventTitle() + this.getTime() + End;
         return prompt;
     }
-
+    //現有事件轉換成字串
     public String jsonToString(){
         try {
             String jsonString = new String(Files.readAllBytes(Paths.get(EVENTPATH)));
@@ -88,7 +88,7 @@ public class EventPrompt {
         }
         return "nothing";
     }
-
+    //課表轉換成字串
     public String CSVToString (String PATH){
         try {
             String content = Files.readString(Paths.get(PATH)); // Java 11+

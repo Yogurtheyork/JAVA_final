@@ -11,7 +11,9 @@ import java.io.IOException;
 public class EventArranger {
     private ChatGPT chatGPT;
     private EventPrompt eventPrompt;
+    private String prompt;
     private final String EventPATH = "src/main/resources/event.json";
+    private String eventTitle = "nothing";
 
     public EventArranger(int selection, String begin, String finish, String times, String duration) {
         Dotenv dotenv = Dotenv.load();
@@ -22,24 +24,24 @@ public class EventArranger {
         }
         chatGPT = new ChatGPT(apiKey);
 
-        this.eventPrompt = new EventPrompt();
+        this.eventPrompt = new EventPrompt(eventTitle);
         eventPrompt.setTime(begin, finish, times, duration);
         switch (selection){
             case 0: // 安排學習計畫
-                arrangeEvents(eventPrompt.LearningPrompt());
+                this.prompt = eventPrompt.LearningPrompt();
                 break;
             case 1: // 安排複習考試
-                arrangeEvents(eventPrompt.ReviewPrompt());
+                this.prompt = eventPrompt.ReviewPrompt();
                 break;
             case 2: // 安排專案進度
-                arrangeEvents(eventPrompt.ProjectPrompt());
+                this.prompt = eventPrompt.ProjectPrompt();
                 break;
             default:
                 System.out.println("無效的選擇");
         }
     }
 
-    public void arrangeEvents(String prompt) {
+    public void arrangeEvents() {
         try {
             String response = chatGPT.chat(prompt);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
