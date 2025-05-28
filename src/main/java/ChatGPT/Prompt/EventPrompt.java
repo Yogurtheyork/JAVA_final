@@ -18,10 +18,13 @@ public class EventPrompt {
     private String Project;
     private String End;
 
+    private String eventTitle = "nothing";
     private String begin = "now";
     private String finish = "15 minutes later";
     private String times = "any";
     private String duration = "15 minutes";
+
+    private final String EVENTPATH = "src/main/resources/event.json";
 
     public EventPrompt(){
         String languageFile = "language/English/EventPrompt.json";
@@ -37,6 +40,15 @@ public class EventPrompt {
             e.printStackTrace();
         }
     }
+
+    public void setEventTitle(String eventTitle){
+        this.eventTitle = eventTitle;
+    }
+
+    public String getEventTitle(){
+        return this.eventTitle;
+    }
+
     //請先設定時間
     public void setTime(String begin, String finish, String times, String duration){
         this.begin = begin;
@@ -51,25 +63,25 @@ public class EventPrompt {
     }
 
     //讓AI安排複習時間
-    public String ReviewPrompt (String PATH){
+    public String ReviewPrompt (){
         String CURRICULUMPATH = "src/main/resources/curriculum.csv";
-        String prompt = this.Start + this.jsonToString(PATH) + this.Curriculum + CSVToString(CURRICULUMPATH) + this.Review + this.getTime() + this.End;
+        String prompt = this.Start + this.jsonToString() + this.Curriculum + CSVToString(CURRICULUMPATH) + this.Review + this.getTime() + this.End;
         return prompt;
     }
     //讓AI安排學習計畫
-    public String LearningPrompt (String PATH){
-        String prompt = this.Start + this.jsonToString(PATH) + Learning + this.getTime() + End;
+    public String LearningPrompt (){
+        String prompt = this.Start + this.jsonToString() + Learning + this.getEventTitle() + this.getTime() + End;
         return prompt;
     }
     //讓AI安排專案規劃
-    public String ProjectPrompt (String PATH){
-        String prompt = this.Start + this.jsonToString(PATH) + Project + this.getTime() + End;
+    public String ProjectPrompt (){
+        String prompt = this.Start + this.jsonToString() + Project + this.getEventTitle() + this.getTime() + End;
         return prompt;
     }
 
-    public String jsonToString(String PATH){
+    public String jsonToString(){
         try {
-            String jsonString = new String(Files.readAllBytes(Paths.get(PATH)));
+            String jsonString = new String(Files.readAllBytes(Paths.get(EVENTPATH)));
             return jsonString;
         } catch (IOException e) {
             e.printStackTrace();

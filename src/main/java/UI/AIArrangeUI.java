@@ -2,12 +2,12 @@ package UI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.google.gson.*;
 
 public class AIArrangeUI extends JFrame {
-
+    private String EventName = null;
     public AIArrangeUI() {
         setTitle("AI 行程安排");
         setSize(500, 500);
@@ -23,7 +23,9 @@ public class AIArrangeUI extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("事件名稱:"), gbc);
         gbc.gridx = 1;
-        JTextField eventNameField = new JTextField();
+        getEventName();
+        JTextField eventNameField = new JTextField(EventName);
+        eventNameField.isValid();
         panel.add(eventNameField, gbc);
 
         // 選項
@@ -136,5 +138,9 @@ public class AIArrangeUI extends JFrame {
 
         add(panel);
         setVisible(true);
+    }
+
+    public void getEventName() {
+        this.EventName = "我的事件";
     }
 }
