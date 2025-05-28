@@ -108,7 +108,7 @@ public class ActiveUI {
         toolsPanel.setVisible(false);
 
         JButton tool1 = new JButton("課表");
-        JButton tool2 = new JButton("T2");
+        JButton tool2 = new JButton("時鐘");
         JButton tool3 = new JButton("T3");
         JButton tool4 = new JButton("T4");
         JButton tool5 = new JButton("T5");
@@ -127,6 +127,15 @@ public class ActiveUI {
             } else {
                 curriculumWindow.toFront();
             }
+        });
+
+        tool2.addActionListener(e -> {
+            JFrame clockFrame = new JFrame("Analog Clock");
+            clockFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            clockFrame.getContentPane().add(new AnalogClockPanel());
+            clockFrame.pack();
+            clockFrame.setLocationRelativeTo(null);
+            clockFrame.setVisible(true);
         });
 
         bottomPanel.add(toolsPanel, BorderLayout.CENTER);
