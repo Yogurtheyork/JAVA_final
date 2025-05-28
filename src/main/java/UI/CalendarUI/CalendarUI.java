@@ -20,6 +20,7 @@ public class CalendarUI extends JPanel {
         CalendarModel model = new CalendarModel();
         EventService eventService = new EventService(googleCalendarService);
         CalendarController controller = new CalendarController(model, eventService);
+        controller.setParentComponent(this);
 
         // 嵌入主視圖
         CalendarMainView mainView = new CalendarMainView(controller);
