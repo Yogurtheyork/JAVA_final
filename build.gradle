@@ -35,7 +35,7 @@ dependencies {
 
 
 application {
-    mainClass = 'ChatGPT.ChatBotExample'
+    mainClass = 'UI.CalendarApplication'
 }
 
 test {

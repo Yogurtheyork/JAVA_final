@@ -1,4 +1,4 @@
-package UI.service;
+package UI.CalendarUI.service;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -15,6 +15,7 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -119,5 +120,10 @@ public class GoogleCalendarServiceImp implements GoogleCalendarService {
         event.setEnd(end);
 
         return event;
+    }
+
+    @Override
+    public List<Event> getEventsForDate(LocalDate date) {
+        return List.of();
     }
 }

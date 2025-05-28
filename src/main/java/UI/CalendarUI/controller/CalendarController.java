@@ -1,12 +1,13 @@
-package UI.controller;
+package UI.CalendarUI.controller;
 
-import UI.model.CalendarModel;
-import UI.service.EventService;
-import UI.view.dialogs.EventDialog;
-import UI.view.dialogs.NewEventDialog;
+import UI.CalendarUI.model.CalendarModel;
+import UI.CalendarUI.service.EventService;
+import UI.CalendarUI.view.dialogs.EventDialog;
+import UI.CalendarUI.view.dialogs.NewEventDialog;
 import com.google.api.services.calendar.model.Event;
 
 import javax.swing.*;
+import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,12 +15,15 @@ public class CalendarController {
 
     private final CalendarModel model;
     private final EventService service;
-    private final JFrame parentFrame;
+    private Component parentComponent; // 可以是 JFrame 也可以是 JPanel
 
-    public CalendarController(CalendarModel model, EventService service, JFrame parentFrame) {
+    public CalendarController(CalendarModel model, EventService service) {
         this.model = model;
         this.service = service;
-        this.parentFrame = parentFrame;
+    }
+
+    public void setParentComponent(Component parent) {
+        this.parentComponent = parent;
     }
 
     public void handleDateSelected(LocalDate date) {
@@ -34,7 +38,7 @@ public class CalendarController {
     }
 
     private void showNewEventDialog(LocalDate date) {
-        NewEventDialog dialog = new NewEventDialog(parentFrame, date, (title, desc, d) -> {
+        NewEventDialog dialog = new NewEventDialog(SwingUtilities.getWindowAncestor(parentComponent), date, (title, desc, d) -> {
             service.addEvent(title, desc, d);
             List<Event> updatedEvents = service.getEventsOnDate(d);
             model.setEventsForDate(d, updatedEvents);
@@ -43,7 +47,7 @@ public class CalendarController {
     }
 
     private void showEventDialog(LocalDate date, List<Event> events) {
-        EventDialog dialog = new EventDialog(parentFrame, events);
+        EventDialog dialog = new EventDialog(SwingUtilities.getWindowAncestor(parentComponent), events);
         dialog.setVisible(true);
     }
 }

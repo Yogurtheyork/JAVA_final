@@ -1,4 +1,4 @@
-package UI.utils;
+package UI.CalendarUI.utils;
 
 import javax.swing.*;
 import java.awt.*;

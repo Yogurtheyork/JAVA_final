@@ -1,39 +1,41 @@
-package UI.view.dialogs;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.List;
+package UI.CalendarUI.view.dialogs;
 
 import com.google.api.services.calendar.model.Event;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class EventDialog extends JDialog {
 
-    private JButton closeButton;
-
-    public EventDialog(JFrame parent, List<Event> events) {
-        super(parent, "Events on Selected Date", true);
+    public EventDialog(Component parentComponent, List<Event> events) {
+        super(SwingUtilities.getWindowAncestor(parentComponent), "Events on Selected Date", ModalityType.APPLICATION_MODAL);
 
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        DefaultListModel<String> listModel = new DefaultListModel<>();
+        JTextArea eventListArea = new JTextArea(15, 40);
+        eventListArea.setEditable(false);
+
+        StringBuilder sb = new StringBuilder();
         for (Event event : events) {
-            String time = event.getStart().getDateTime() != null ? event.getStart().getDateTime().toStringRfc3339() : event.getStart().getDate().toStringRfc3339();
-            listModel.addElement("- " + event.getSummary() + " at " + time);
+            sb.append("Title: ").append(event.getSummary()).append("\n");
+            sb.append("Description: ").append(event.getDescription() == null ? "" : event.getDescription()).append("\n");
+            sb.append("Start: ").append(event.getStart().getDateTime() != null ? event.getStart().getDateTime().toStringRfc3339() : event.getStart().getDate()).append("\n");
+            sb.append("End: ").append(event.getEnd().getDateTime() != null ? event.getEnd().getDateTime().toStringRfc3339() : event.getEnd().getDate()).append("\n\n");
         }
 
-        JList<String> eventList = new JList<>(listModel);
-        eventList.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        panel.add(new JScrollPane(eventList), BorderLayout.CENTER);
+        eventListArea.setText(sb.toString());
+        panel.add(new JScrollPane(eventListArea), BorderLayout.CENTER);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dispose());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        closeButton = new JButton("Close");
-        closeButton.addActionListener((ActionEvent e) -> dispose());
         buttonPanel.add(closeButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         this.setContentPane(panel);
-        this.setSize(400, 300);
-        this.setLocationRelativeTo(parent);
+        this.pack();
+        this.setLocationRelativeTo(parentComponent);
     }
 }

@@ -1,15 +1,13 @@
-package ChatGPT;
+/*package ChatGPT;
 
-import ChatGPT.ChatGPT;
-import ChatGPT.Prompt.EventPrompt;
-import UI.service.EventService;
+import UI.CalendarUI.service.EventServiceImp;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 
 public class EventArranger {
     private ChatGPT chatGPT;
-    private EventService eventService;
+    private EventServiceImp eventServiceImp;
 
     public EventArranger() {
         Dotenv dotenv = Dotenv.load();
@@ -19,7 +17,7 @@ public class EventArranger {
             System.exit(1);
         }
         chatGPT = new ChatGPT(apiKey);
-        eventService = new EventService();
+        eventServiceImp = new EventServiceImp();
     }
 
     public void arrangeEvents(String prompt) {
@@ -30,4 +28,4 @@ public class EventArranger {
             e.printStackTrace();
         }
     }
-}
+}*/

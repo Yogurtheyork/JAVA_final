@@ -1,6 +1,6 @@
 package GoogleCalendar;
 
-import UI.service.GoogleCalendarService;
+import GoogleCalendar.service.GoogleCalendarService;
 import GoogleCalendar.service.GoogleCalendarServiceImpl;
 import GoogleCalendar.util.JsonUtil;
 import com.google.api.services.calendar.model.Event;

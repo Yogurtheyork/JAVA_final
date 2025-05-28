@@ -10,9 +10,9 @@ import UI.CalendarUI.view.CalendarMainView;
 import javax.swing.*;
 import java.awt.*;
 
-public class CalendarUIPanel extends JPanel {
+public class CalendarUI extends JPanel {
 
-    public CalendarUIPanel() throws Exception {
+    public CalendarUI() throws Exception {
         setLayout(new BorderLayout());
 
         // 初始化 MVC 元件

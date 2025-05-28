@@ -1,4 +1,4 @@
-package UI.view;
+package UI.CalendarUI.view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -10,7 +10,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
-import UI.controller.CalendarController;
+import UI.CalendarUI.controller.CalendarController;
 
 public class WeekView extends JPanel {
 

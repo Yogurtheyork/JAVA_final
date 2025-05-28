@@ -1,4 +1,4 @@
-package UI.view.dialogs;
+package UI.CalendarUI.view.dialogs;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,8 +17,8 @@ public class NewEventDialog extends JDialog {
         void onSave(String title, String description, LocalDate date);
     }
 
-    public NewEventDialog(JFrame parent, LocalDate date, EventSaveListener listener) {
-        super(parent, "Add New Event", true);
+    public NewEventDialog(Component parentComponent, LocalDate date, EventSaveListener listener) {
+        super(SwingUtilities.getWindowAncestor(parentComponent), "Add New Event", ModalityType.APPLICATION_MODAL);
         this.date = date;
 
         JPanel panel = new JPanel(new BorderLayout(10, 10));
@@ -57,6 +57,6 @@ public class NewEventDialog extends JDialog {
 
         this.setContentPane(panel);
         this.pack();
-        this.setLocationRelativeTo(parent);
+        this.setLocationRelativeTo(parentComponent);
     }
 }

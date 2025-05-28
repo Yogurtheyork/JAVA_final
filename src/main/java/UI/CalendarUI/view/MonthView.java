@@ -1,4 +1,4 @@
-package UI.view;
+package UI.CalendarUI.view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,8 +9,8 @@ import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import UI.controller.CalendarController;
-import UI.utils.DateUtils;
+import UI.CalendarUI.controller.CalendarController;
+import UI.CalendarUI.utils.DateUtils;
 
 public class MonthView extends JPanel {
 

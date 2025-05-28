@@ -1,4 +1,4 @@
-package UI.view;
+package UI.CalendarUI.view;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,7 +7,7 @@ import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.Month;
 
-import UI.controller.CalendarController;
+import UI.CalendarUI.controller.CalendarController;
 
 public class YearView extends JPanel {
 

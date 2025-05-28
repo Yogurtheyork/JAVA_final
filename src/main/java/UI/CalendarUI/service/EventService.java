@@ -1,6 +1,6 @@
-package UI.service;
+package UI.CalendarUI.service;
 
-import UI.service.GoogleCalendarService;
+import UI.CalendarUI.service.GoogleCalendarService;
 import com.google.api.services.calendar.model.Event;
 
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ public class EventService {
         DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         String start = date.atStartOfDay().format(fmt);
         String end = date.plusDays(1).atStartOfDay().format(fmt);
-        String timeZone = "Asia/Taipei";
-        googleService.createEvent(title, description, start, end, timeZone);
+        // location 暫留空，符合介面簽章
+        googleService.createEvent(title, "", description, start, end);
     }
 }

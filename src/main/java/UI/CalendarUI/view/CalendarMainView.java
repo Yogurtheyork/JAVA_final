@@ -1,6 +1,9 @@
-package UI.view;
+package UI.CalendarUI.view;
 
-import UI.controller.CalendarController;
+import UI.CalendarUI.controller.CalendarController;
+import UI.CalendarUI.view.MonthView;
+import UI.CalendarUI.view.WeekView;
+import UI.CalendarUI.view.YearView;
 
 import javax.swing.*;
 import java.awt.*;

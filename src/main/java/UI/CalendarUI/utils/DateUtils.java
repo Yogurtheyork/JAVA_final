@@ -1,4 +1,4 @@
-package UI.utils;
+package UI.CalendarUI.utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

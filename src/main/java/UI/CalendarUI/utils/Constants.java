@@ -1,4 +1,4 @@
-package UI.utils;
+package UI.CalendarUI.utils;
 
 public class Constants {
 
