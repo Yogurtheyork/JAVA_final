@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
-public class googleCalendarServiceImp implements GoogleCalendarService {
+public class GoogleCalendarServiceImp implements GoogleCalendarService {
     private static final String APPLICATION_NAME = "Google Calendar Service";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
@@ -29,7 +29,7 @@ public class googleCalendarServiceImp implements GoogleCalendarService {
 
     private final Calendar calendarService;
 
-    public googleCalendarServiceImp() throws Exception {
+    public GoogleCalendarServiceImp() throws Exception {
         this.calendarService = initializeCalendarService();
     }
 
