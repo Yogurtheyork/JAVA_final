@@ -6,6 +6,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 import UI.CalendarUI.controller.CalendarController;
 
@@ -33,6 +36,7 @@ public class YearView extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
         yearLabel = new JLabel("", SwingConstants.CENTER);
+        yearLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         headerPanel.add(yearLabel, BorderLayout.CENTER);
 
         JPanel btnPanel = new JPanel(new FlowLayout());
@@ -66,21 +70,52 @@ public class YearView extends JPanel {
 
         for (int i = 1; i <= 12; i++) {
             final int month = i;
-            JButton monthBtn = new JButton(Month.of(i).name());
+            JPanel monthPanel = new JPanel(new BorderLayout());
+            JButton monthBtn = new JButton(Month.of(i).getDisplayName(TextStyle.FULL, Locale.getDefault()));
             monthBtn.setFont(new Font("SansSerif", Font.PLAIN, 16));
             monthBtn.setBackground(Color.WHITE);
             monthBtn.setFocusPainted(false);
-            monthBtn.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    LocalDate selectedDate = LocalDate.of(currentYear, month, 1);
-                    controller.handleMonthSelected(selectedDate);
-                }
+            monthBtn.addActionListener(e -> {
+                LocalDate selectedDate = LocalDate.of(currentYear, month, 1);
+                controller.handleMonthSelected(selectedDate);
             });
-            monthsPanel.add(monthBtn);
+
+            JPanel miniCal = buildMiniCalendar(currentYear, month);
+            monthPanel.add(monthBtn, BorderLayout.NORTH);
+            monthPanel.add(miniCal, BorderLayout.CENTER);
+
+            monthsPanel.add(monthPanel);
         }
 
         monthsPanel.revalidate();
         monthsPanel.repaint();
+    }
+
+    private JPanel buildMiniCalendar(int year, int month) {
+        JPanel panel = new JPanel(new GridLayout(0, 7));
+        String[] days = {"S", "M", "T", "W", "T", "F", "S"};
+        for (String d : days) {
+            JLabel label = new JLabel(d, SwingConstants.CENTER);
+            label.setFont(new Font("SansSerif", Font.BOLD, 10));
+            panel.add(label);
+        }
+
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate firstDay = ym.atDay(1);
+        int dayOfWeek = firstDay.getDayOfWeek().getValue() % 7;
+        int daysInMonth = ym.lengthOfMonth();
+
+        for (int i = 0; i < dayOfWeek; i++) {
+            panel.add(new JLabel(""));
+        }
+
+        for (int d = 1; d <= daysInMonth; d++) {
+            JLabel dayLabel = new JLabel(String.valueOf(d), SwingConstants.CENTER);
+            dayLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            panel.add(dayLabel);
+        }
+
+        return panel;
     }
 
     private void changeYear(int delta) {
