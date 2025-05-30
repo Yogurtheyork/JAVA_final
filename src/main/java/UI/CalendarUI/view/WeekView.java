@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import UI.CalendarUI.controller.CalendarController;
@@ -38,6 +39,28 @@ public class WeekView extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
         weekLabel = new JLabel("", SwingConstants.CENTER);
+        weekLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+
+        // 讓週標題可以點擊回到月視圖
+        weekLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                controller.handleMonthSelected(startOfWeek);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                weekLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                weekLabel.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                weekLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                weekLabel.setForeground(Color.BLACK);
+            }
+        });
+
         headerPanel.add(weekLabel, BorderLayout.CENTER);
 
         JPanel btnPanel = new JPanel(new FlowLayout());
@@ -87,8 +110,18 @@ public class WeekView extends JPanel {
         this.add(scrollPane, BorderLayout.CENTER);
     }
 
+    // 新增：提供給 Controller 調用的更新方法
+    public void update(LocalDate date) {
+        this.startOfWeek = getStartOfCurrentWeek(date);
+        updateWeek();
+    }
+
     private void updateWeek() {
-        weekLabel.setText("Week of " + startOfWeek.toString());
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+
+        String weekRange = startOfWeek.format(formatter) + " - " + endOfWeek.format(formatter) + ", " + startOfWeek.getYear();
+        weekLabel.setText(weekRange);
 
         tableModel.setRowCount(0);
         for (int hour = 0; hour < 24; hour++) {

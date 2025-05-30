@@ -2,8 +2,6 @@ package UI.CalendarUI.view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -75,7 +73,9 @@ public class YearView extends JPanel {
             monthBtn.setFont(new Font("SansSerif", Font.PLAIN, 16));
             monthBtn.setBackground(Color.WHITE);
             monthBtn.setFocusPainted(false);
-            monthBtn.addActionListener(e -> {
+
+            // 改為由 controller 註冊動作
+            controller.registerMonthButton(month, monthBtn, () -> {
                 LocalDate selectedDate = LocalDate.of(currentYear, month, 1);
                 controller.handleMonthSelected(selectedDate);
             });

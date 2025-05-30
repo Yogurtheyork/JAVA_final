@@ -42,6 +42,28 @@ public class MonthView extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
         monthLabel = new JLabel("", SwingConstants.CENTER);
+        monthLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+
+        // 讓月份標題可以點擊回到年視圖
+        monthLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                controller.handleYearSelected(LocalDate.of(currentYear, currentMonth, 1));
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                monthLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                monthLabel.setForeground(Color.BLUE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                monthLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                monthLabel.setForeground(Color.BLACK);
+            }
+        });
+
         headerPanel.add(monthLabel, BorderLayout.CENTER);
 
         JPanel btnPanel = new JPanel(new FlowLayout());
@@ -86,7 +108,13 @@ public class MonthView extends JPanel {
                     String dayText = dayLabel.getText();
                     if (!dayText.isEmpty()) {
                         LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, Integer.parseInt(dayText));
-                        controller.handleDaySelected(selectedDate);
+
+                        // 雙擊進入週視圖並彈出新事件對話框，單擊選擇日期
+                        if (e.getClickCount() == 1) {
+                            controller.handleWeekSelectedWithNewEvent(selectedDate);
+                        } else {
+                            controller.handleDateSelected(selectedDate);
+                        }
                     }
                 }
             }
@@ -96,6 +124,13 @@ public class MonthView extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(calendarTable);
         this.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    // 新增：提供給 Controller 調用的更新方法
+    public void update(LocalDate date) {
+        this.currentYear = date.getYear();
+        this.currentMonth = date.getMonthValue();
+        updateCalendar();
     }
 
     private void updateCalendar() {
