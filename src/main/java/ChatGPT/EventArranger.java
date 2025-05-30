@@ -12,7 +12,7 @@ public class EventArranger {
     private ChatGPT chatGPT;
     private EventPrompt eventPrompt;
     private String prompt;
-    private final String EventPATH = "src/main/resources/event.json";
+    private final String EventPATH = "src/main/resources/calendar_events.json";
     private String eventTitle = "nothing";
 
     public EventArranger(int selection, String begin, String finish, String times, String duration) {

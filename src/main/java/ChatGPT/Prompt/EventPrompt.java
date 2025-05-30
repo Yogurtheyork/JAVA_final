@@ -24,10 +24,10 @@ public class EventPrompt {
     private String times = "any";
     private String duration = "15 minutes";
 
-    private final String EVENTPATH = "src/main/resources/event.json";
+    private final String EVENTPATH = "src/main/resources/calendar_events.json";
 
     public EventPrompt(String eventTitle) {
-        String languageFile = "language/English/EventPrompt.json";
+        String languageFile = "src/main/resources/language/English/EventPrompt.json";
         try (FileReader reader = new FileReader(languageFile)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             setEventTitle(eventTitle);
