@@ -11,6 +11,7 @@ public class EventService extends GoogleCalendarServiceImp{
 
     public EventService() throws Exception {
         super();
+        fetchEvents();
     }
 
     public List<Event> getEventsOnDate(LocalDate date) {

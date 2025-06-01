@@ -1,5 +1,6 @@
 package UI.CalendarUI.service;
 
+import GoogleCalendar.util.JsonUtil;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -27,6 +28,7 @@ public class GoogleCalendarServiceImp implements GoogleCalendarService {
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
+    private static final String EVENTS_FILE_PATH = "src/main/resources/events.json";
 
     private final Calendar calendarService;
 
@@ -125,5 +127,32 @@ public class GoogleCalendarServiceImp implements GoogleCalendarService {
     @Override
     public List<Event> getEventsForDate(LocalDate date) {
         return List.of();
+    }
+
+    public void fetchAndSaveEvents() throws Exception {
+
+        // Ensure the events.json file exists
+        File eventsFile = new File(EVENTS_FILE_PATH);
+        if (!eventsFile.exists()) {
+            eventsFile.getParentFile().mkdirs(); // Ensure parent directories exist
+            eventsFile.createNewFile();
+        }
+
+        // Fetch events from events.json
+        List<Event> events = events = fetchEvents();
+
+        if (events.isEmpty()) {
+            System.out.println("找不到行程");
+        } else {
+            System.out.println("接下來的行程：");
+            for (Event event : events) {
+                System.out.printf(" - %s (%s ~ %s)\n",
+                        event.getSummary(),
+                        event.getStart().getDateTime() != null ? event.getStart().getDateTime() : event.getStart().getDate(),
+                        event.getEnd().getDateTime() != null ? event.getEnd().getDateTime() : event.getEnd().getDate());
+            }
+            JsonUtil.saveEventsToJson(events, EVENTS_FILE_PATH);
+            System.out.println("行程已儲存到：" + EVENTS_FILE_PATH);
+        }
     }
 }

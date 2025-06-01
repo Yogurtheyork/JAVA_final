@@ -21,4 +21,7 @@ public interface GoogleCalendarService {
                      String startTime, String endTime);
 
     List<Event> getEventsForDate(LocalDate date);
+
+    void fetchAndSaveEvents() throws Exception;
 }
+

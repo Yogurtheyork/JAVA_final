@@ -126,6 +126,7 @@ public class CalendarController {
 
                         Event newEvent = service.createEvent(summary, location, description, startRfc3339, endRfc3339);
                         service.insertEvent(newEvent);
+                        service.fetchAndSaveEvents();
 
                         List<Event> updatedEvents = service.getEventsOnDate(d);
                         model.setEventsForDate(d, updatedEvents);
