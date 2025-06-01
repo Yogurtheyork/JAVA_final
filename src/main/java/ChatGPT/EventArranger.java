@@ -2,7 +2,7 @@ package ChatGPT;
 
 import ChatGPT.ChatGPT;
 import ChatGPT.Prompt.EventPrompt;
-import UI.service.EventService;
+import UI.CalendarUI.service.EventService;
 import io.github.cdimascio.dotenv.Dotenv;
 import com.google.gson.*;
 import java.io.FileWriter;
