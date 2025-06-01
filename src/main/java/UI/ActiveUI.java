@@ -43,7 +43,7 @@ public class ActiveUI {
         aiArrangeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AIArrangeUI aiArrangeUI = new AIArrangeUI();
+                AIArrangeUI aiArrangeUI = new AIArrangeUI("test");
                 aiArrangeUI.setVisible(true);
             }
         });

@@ -13,7 +13,7 @@ public class EventArranger {
     private EventPrompt eventPrompt;
     private String prompt;
     private final String EventPATH = "src/main/resources/events.json";
-    private String eventTitle = "nothing";
+    private String eventTitle = null;
 
     public EventArranger(int selection, String begin, String finish, String times, String duration) {
         Dotenv dotenv = Dotenv.load();
@@ -53,5 +53,9 @@ public class EventArranger {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setEventTitle(String eventTitle) {
+        this.eventTitle = eventTitle;
     }
 }
