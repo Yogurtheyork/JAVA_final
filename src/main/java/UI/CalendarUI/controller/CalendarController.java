@@ -130,6 +130,8 @@ public class CalendarController {
 
                         List<Event> updatedEvents = service.getEventsOnDate(d);
                         model.setEventsForDate(d, updatedEvents);
+                        monthView.update(date);
+                        weekView.update(date);
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
