@@ -1,5 +1,5 @@
 {
-  "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [title], [start], [end], [location], [description].The following json format data is [existing schedule],",
+  "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [title], [start], [end], [location], [description] in list.The following json format data is [existing schedule],",
   "Learning": "The following json format data is my [target event],please help me to arrange the learning schedule.",
   "Review": "The following json format data is my [target event], please help me to arrange the learning schedule.",
   "Curriculum": "The following csv format data is my [curriculum].",

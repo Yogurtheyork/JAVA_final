@@ -24,7 +24,7 @@ public class EventPrompt {
     private String times = "any";
     private String duration = "15 minutes";
 
-    private final String EVENTPATH = "src/main/resources/calendar_events.json";
+    private final String EVENTPATH = "src/main/resources/events.json";
 
     public EventPrompt(String eventTitle) {
         String languageFile = "src/main/resources/language/English/EventPrompt.json";

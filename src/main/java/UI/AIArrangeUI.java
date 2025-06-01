@@ -9,11 +9,12 @@ import com.google.gson.*;
 import ChatGPT.EventArranger;
 
 public class AIArrangeUI extends JFrame {
-    private String EventName = null;
+    private String EventName;
     private final String[] begin = {"now", "event start"};
     private final String[] finish = {"3 months", "event end"};
     private final String[] duration = {"15 minutes", "30 minutes", "1 hour", "3 hours"};
-    public AIArrangeUI() {
+    public AIArrangeUI(String EventName) {
+        this.EventName = EventName;
         setTitle("AI 行程安排");
         setSize(500, 500);
         setLocationRelativeTo(null);
@@ -28,7 +29,6 @@ public class AIArrangeUI extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("事件名稱:"), gbc);
         gbc.gridx = 1;
-        getEventName();
         JTextField eventNameField = new JTextField(EventName);
         eventNameField.isValid();
         panel.add(eventNameField, gbc);
@@ -127,6 +127,7 @@ public class AIArrangeUI extends JFrame {
             String tillStr = duration[till];
 
             EventArranger eventArranger = new EventArranger(option, fromDateStr, toDateStr, String.valueOf(times), tillStr);
+            eventArranger.setEventTitle(EventName);
             eventArranger.arrangeEvents();
             JOptionPane.showMessageDialog(null,
                     "事件名稱: " + eventName + "\n" +
@@ -140,9 +141,5 @@ public class AIArrangeUI extends JFrame {
 
         add(panel);
         setVisible(true);
-    }
-
-    public void getEventName() {
-        this.EventName = "我的事件";//TODO 接收事件名稱
     }
 }
