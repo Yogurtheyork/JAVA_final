@@ -1,14 +1,19 @@
 package ChatGPT;
-
-import ChatGPT.ChatGPT;
+// ChatGPT
 import ChatGPT.Prompt.EventPrompt;
-import UI.CalendarUI.service.*;
 import io.github.cdimascio.dotenv.Dotenv;
+// Json
 import com.google.gson.*;
-
+import com.google.gson.reflect.TypeToken;
+// Google Calendar
+import com.google.api.services.calendar.model.*;
+//Java
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.*;
+
+import DataStructures.SimplifiedEvent;
+import UI.CalendarUI.service.*;
 
 public class EventArranger {
     private ChatGPT chatGPT;
@@ -16,6 +21,7 @@ public class EventArranger {
     private String prompt;
     private final String EventPATH = "src/main/resources/events.json";
     private String eventTitle = null;
+    private GoogleCalendarServiceImp googleService;
 
     public EventArranger(int selection, String begin, String finish, String times, String duration) throws FileNotFoundException {
         Dotenv dotenv = Dotenv.load();
@@ -45,15 +51,23 @@ public class EventArranger {
 
     public void arrangeEvents() {
         try {
+            //取得事件安排
             String response = chatGPT.chat(prompt);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement jsonElement = JsonParser.parseString(response);
-            FileWriter writer = new FileWriter(EventPATH);
-            gson.toJson(jsonElement, writer);
-            writer.close();
+            //System.out.println(response);
+            // 寫入事件
+            googleService = new GoogleCalendarServiceImp();
+            List<SimplifiedEvent> events = gson.fromJson(response, new TypeToken<List<SimplifiedEvent>>(){}.getType());
+            for (SimplifiedEvent event : events) {
+                // 將事件寫入 Google Calendar
+                googleService.insertEvent(googleService.createEvent(event.title, event.location, event.description, event.start, event.end));
+            }
+            googleService.fetchAndSaveEvents();
             System.out.println("事件安排完成");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
