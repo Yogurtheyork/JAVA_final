@@ -2,6 +2,7 @@ package UI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.google.gson.*;
@@ -126,7 +127,12 @@ public class AIArrangeUI extends JFrame {
             String toDateStr = to==2 ? sdf.format((Date) toDateSpinner.getValue()) : finish[to];
             String tillStr = duration[till];
 
-            EventArranger eventArranger = new EventArranger(option, fromDateStr, toDateStr, String.valueOf(times), tillStr);
+            EventArranger eventArranger = null;
+            try {
+                eventArranger = new EventArranger(option, fromDateStr, toDateStr, String.valueOf(times), tillStr);
+            } catch (FileNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
             eventArranger.setEventTitle(EventName);
             eventArranger.arrangeEvents();
             JOptionPane.showMessageDialog(null,
