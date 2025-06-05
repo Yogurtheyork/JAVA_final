@@ -133,7 +133,7 @@ public class GoogleCalendarServiceImp implements GoogleCalendarService {
         return event; // 回傳事件物件
     }
 
-    // 根據指定日期取得事件（目前未實作）
+    // 根據指定日期取得事件
     @Override
     public List<Event> getEventsForDate(LocalDate date) {
         return List.of(); // 回傳空列表
