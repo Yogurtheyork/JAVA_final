@@ -2,8 +2,8 @@ package ChatGPT.Prompt;
 
 // Json
 import com.google.gson.*;
+import DataStructures.SimplifiedEvent;
 // Java
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -34,19 +34,6 @@ public class EventPrompt {
 
     private void loadLanguageSettings(String languageFile) {
         try {
-            // 檢查檔案是否存在
-            if (!Files.exists(Paths.get(languageFile))) {
-                System.err.println("語言設定檔案不存在: " + languageFile + "，使用預設值");
-                return;
-            }
-
-            // 檢查檔案是否為空
-            String content = Files.readString(Paths.get(languageFile));
-            if (content.trim().isEmpty()) {
-                System.err.println("語言設定檔案為空: " + languageFile + "，使用預設值");
-                return;
-            }
-
             try (FileReader reader = new FileReader(languageFile)) {
                 JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
 
@@ -259,18 +246,3 @@ public class EventPrompt {
     }
 }
 
-class SimplifiedEvent {
-    String title;
-    String start;
-    String end;
-    String location;
-    String description;
-
-    public SimplifiedEvent(String title, String start, String end, String location, String description) {
-        this.title = title;
-        this.start = start;
-        this.end = end;
-        this.location = location;
-        this.description = description;
-    }
-}
