@@ -11,42 +11,45 @@ import java.util.ArrayList;
 
 public class JsonService {
 
-    private static final String EVENTS_FILE_PATH = "src/main/resources/events.json";
-    Gson gson;
-    FileReader reader;
+    private static final String EVENTS_FILE_PATH = "src/main/resources/events.json"; // 事件 JSON 檔案的路徑
+    Gson gson; // 用於處理 JSON 的 Gson 物件
+    FileReader reader; // 用於讀取檔案的 FileReader 物件
 
+    // 建構子：初始化 Gson 並嘗試讀取事件檔案
     public JsonService(){
-        gson = new Gson();
-        reader = null;
+        gson = new Gson(); // 初始化 Gson
+        reader = null; // 初始化 reader 為 null
         try {
-            reader = new FileReader(EVENTS_FILE_PATH);
+            reader = new FileReader(EVENTS_FILE_PATH); // 嘗試讀取事件檔案
         }catch (FileNotFoundException e){
-            System.out.println("File events.json was not found.");
+            System.out.println("File events.json was not found."); // 如果檔案不存在，輸出錯誤訊息
         }
     }
 
+    // 方法：回傳事件資訊
     public void getEventInfo(){
-        Type listType = new TypeToken<List<Event>>(){}.getType();
-        List<Event> ListEvents = gson.fromJson(reader, listType);
+        Type listType = new TypeToken<List<Event>>(){}.getType(); // 定義事件列表的型別
+        List<Event> ListEvents = gson.fromJson(reader, listType); // 從 JSON 檔案中解析事件列表
 
+        // 遍歷事件列表並列印每個事件的摘要、開始時間和結束時間
         for (Event e  : ListEvents){
             System.out.println("Summary: " + e.summary + " Start value " + e.start.dateTime.value + " End value " + e.end.dateTime.value);
         }
     }
 
-    // 新增：獲取所有事件的方法
+    // 方法：獲取所有事件
     public List<Event> getAllEvents() {
         try {
             // 每次調用都重新創建 FileReader，確保讀取最新資料
             FileReader reader = new FileReader(EVENTS_FILE_PATH);
-            Type listType = new TypeToken<List<Event>>(){}.getType();
-            List<Event> events = gson.fromJson(reader, listType);
-            reader.close();
+            Type listType = new TypeToken<List<Event>>(){}.getType(); // 定義事件列表的型別
+            List<Event> events = gson.fromJson(reader, listType); // 從 JSON 檔案中解析事件列表
+            reader.close(); // 關閉檔案讀取器
 
-            return events != null ? events : new ArrayList<>();
+            return events != null ? events : new ArrayList<>(); // 如果事件列表為 null，回傳空列表
         } catch (Exception e) {
-            System.out.println("Error reading events: " + e.getMessage());
-            return new ArrayList<>();
+            System.out.println("Error reading events: " + e.getMessage()); // 如果發生錯誤，輸出錯誤訊息
+            return new ArrayList<>(); // 回傳空列表
         }
     }
 }

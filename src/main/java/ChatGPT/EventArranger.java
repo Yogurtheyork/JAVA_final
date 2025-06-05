@@ -2,9 +2,11 @@ package ChatGPT;
 
 import ChatGPT.ChatGPT;
 import ChatGPT.Prompt.EventPrompt;
-import UI.CalendarUI.service.EventService;
+import UI.CalendarUI.service.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import com.google.gson.*;
+
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -15,7 +17,7 @@ public class EventArranger {
     private final String EventPATH = "src/main/resources/events.json";
     private String eventTitle = null;
 
-    public EventArranger(int selection, String begin, String finish, String times, String duration) {
+    public EventArranger(int selection, String begin, String finish, String times, String duration) throws FileNotFoundException {
         Dotenv dotenv = Dotenv.load();
         String apiKey = dotenv.get("OPENAI_API_KEY");
         if (apiKey == null || apiKey.isEmpty()) {
