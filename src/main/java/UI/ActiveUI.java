@@ -23,7 +23,7 @@ public class ActiveUI {
         // --- 右上角 User Setting Button 與 AI 行程安排按鈕 ---
         JPanel topPanel = new JPanel(new BorderLayout());
 
-        JButton settingButton = new JButton("⚙ 設定");
+        JButton settingButton = new JButton("⚙ Settings");
         settingButton.setPreferredSize(new Dimension(100, 30));
         topPanel.add(settingButton, BorderLayout.EAST);
 

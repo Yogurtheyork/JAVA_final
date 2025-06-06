@@ -1,0 +1,21 @@
+{
+  "Title": "使用者設定",
+  "Labels": {
+    "Language": "語言: ",
+    "Size": "字體大小: "
+  },
+  "Sizes": {
+    "Small": "小",
+    "Normal": "中",
+    "Large": "大"
+  },
+  "Buttons": {
+    "Save": "儲存",
+    "Default": "預設"
+  },
+  "Messages": {
+    "Saved": "設定已儲存",
+    "Defaulted": "設定已恢復為預設",
+    "Error": "儲存設定時發生錯誤: ",
+  }
+}
