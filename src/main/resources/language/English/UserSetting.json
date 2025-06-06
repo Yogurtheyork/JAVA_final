@@ -1,0 +1,21 @@
+{
+  "Title": "User Settings",
+  "Labels": {
+    "Language": "Language: ",
+    "Size": "Font Size: "
+  },
+  "Sizes": {
+    "Small": "Small",
+    "Normal": "Normal",
+    "Large": "Large"
+  },
+  "Buttons": {
+    "Save": "Save",
+    "Default": "Default"
+  },
+  "Messages": {
+    "Saved": "Settings have been saved",
+    "Defaulted": "Settings have been reset to default",
+    "Error": "Error saving settings: "
+  }
+}
