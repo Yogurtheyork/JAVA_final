@@ -116,7 +116,7 @@ public class CalendarController {
         NewEventDialog dialog = new NewEventDialog(
                 SwingUtilities.getWindowAncestor(parentComponent),
                 date,
-                (summary, location, description, d, startTime, endTime) -> {
+                (summary, location, description, d, startTime, endTime, ai) -> {
                     try {
                         ZoneId zoneId = ZoneId.systemDefault();
                         ZonedDateTime startDateTime = ZonedDateTime.of(d, java.time.LocalTime.parse(startTime), zoneId);
@@ -134,6 +134,11 @@ public class CalendarController {
                         monthView.update(date);
                         weekView.update(date);
 
+                        if (ai) {
+                            AIArrangeUI ui = new AIArrangeUI(summary);
+                            ui.setVisible(true);
+                        }
+
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(parentComponent, "Error saving event: " + ex.getMessage(),
@@ -145,7 +150,41 @@ public class CalendarController {
     }
 
     private void showEventDialog(LocalDate date, List<Event> events) {
-        EventDialog dialog = new EventDialog(SwingUtilities.getWindowAncestor(parentComponent), events);
+        EventDialog dialog = new EventDialog(
+                SwingUtilities.getWindowAncestor(parentComponent),
+                events,
+                this,
+                date);
         dialog.setVisible(true);
+    }
+
+    public void updateExistingEvent(Event event, LocalDate date) {
+        try {
+            service.updateEvent(event);
+            service.fetchAndSaveEvents();
+            List<Event> updatedEvents = service.getEventsOnDate(date);
+            model.setEventsForDate(date, updatedEvents);
+            monthView.update(date);
+            weekView.update(date);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(parentComponent,
+                    "Error updating event: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void deleteExistingEvent(Event event, LocalDate date) {
+        try {
+            service.deleteEvent(event.getId());
+            service.fetchAndSaveEvents();
+            List<Event> updatedEvents = service.getEventsOnDate(date);
+            model.setEventsForDate(date, updatedEvents);
+            monthView.update(date);
+            weekView.update(date);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(parentComponent,
+                    "Error deleting event: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

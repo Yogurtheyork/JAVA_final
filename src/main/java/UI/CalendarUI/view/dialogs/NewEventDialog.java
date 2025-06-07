@@ -14,10 +14,11 @@ public class NewEventDialog extends JDialog {
     private JList<String> timeList;
     private JButton saveButton;
     private JButton cancelButton;
+    private JCheckBox aiScheduleBox;
     private LocalDate date;
 
     public interface EventSaveListener {
-        void onSave(String summary, String location, String description, LocalDate date, String startTime, String endTime);
+        void onSave(String summary, String location, String description, LocalDate date, String startTime, String endTime, boolean ai);
     }
 
     public NewEventDialog(Component parentComponent, LocalDate date, EventSaveListener listener) {
@@ -25,7 +26,7 @@ public class NewEventDialog extends JDialog {
         this.date = date;
 
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        JPanel formPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+        JPanel formPanel = new JPanel(new GridLayout(7, 1, 5, 5));
 
         summaryField = new JTextField();
         locationField = new JTextField();
@@ -37,6 +38,8 @@ public class NewEventDialog extends JDialog {
         formPanel.add(locationField);
         formPanel.add(new JLabel("Description:"));
         formPanel.add(new JScrollPane(descriptionArea));
+        aiScheduleBox = new JCheckBox("AI Auto Schedule");
+        formPanel.add(aiScheduleBox);
 
         panel.add(formPanel, BorderLayout.NORTH);
 
@@ -82,7 +85,7 @@ public class NewEventDialog extends JDialog {
             String startTime = selectedTimes.get(0);
             String endTime = selectedTimes.get(selectedTimes.size() - 1);
 
-            listener.onSave(summary, location, desc, date, startTime, endTime);
+            listener.onSave(summary, location, desc, date, startTime, endTime, aiScheduleBox.isSelected());
             dispose();
         });
 
@@ -97,3 +100,4 @@ public class NewEventDialog extends JDialog {
         this.setLocationRelativeTo(parentComponent);
     }
 }
+
