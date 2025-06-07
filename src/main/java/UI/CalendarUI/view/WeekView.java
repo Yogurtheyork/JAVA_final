@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.service.JsonService;
 import UI.CalendarUI.service.Event;
+import UI.CalendarUI.model.CalendarPanel;
 
 public class WeekView extends JPanel {
 
@@ -204,53 +205,7 @@ public class WeekView extends JPanel {
 
     // 新增：創建事件儲存格內容
     private JPanel createEventCellContent(List<Event> events) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
-
-        // 最多顯示2個事件，避免過度擁擠
-        int maxEventsToShow = Math.min(events.size(), 2);
-        for (int i = 0; i < maxEventsToShow; i++) {
-            Event event = events.get(i);
-
-            // 格式化事件顯示
-            LocalDateTime startTime = Instant.ofEpochMilli(event.start.dateTime.value)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime();
-
-            String timeStr = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-            String displayText = timeStr + " " + event.summary;
-
-            JLabel eventLabel = new JLabel(displayText);
-            eventLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-            eventLabel.setForeground(Color.WHITE);
-            eventLabel.setOpaque(true);
-            eventLabel.setBackground(new Color(70, 130, 180)); // 鋼藍色
-            eventLabel.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-
-            // 設置圓角邊框效果
-            eventLabel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(50, 100, 150), 1),
-                    BorderFactory.createEmptyBorder(1, 3, 1, 3)
-            ));
-
-            panel.add(eventLabel);
-
-            // 在事件之間添加小間距
-            if (i < maxEventsToShow - 1) {
-                panel.add(Box.createVerticalStrut(2));
-            }
-        }
-
-        // 如果有更多事件，顯示數量提示
-        if (events.size() > maxEventsToShow) {
-            JLabel moreLabel = new JLabel("+" + (events.size() - maxEventsToShow) + " more");
-            moreLabel.setFont(new Font("SansSerif", Font.ITALIC, 9));
-            moreLabel.setForeground(Color.GRAY);
-            panel.add(moreLabel);
-        }
-
-        return panel;
+        return new CalendarPanel(null, events, CalendarPanel.ViewMode.WEEK);
     }
 
     private void changeWeek(int delta) {

@@ -16,6 +16,7 @@ import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.utils.DateUtils;
 import UI.CalendarUI.service.JsonService;
 import UI.CalendarUI.service.Event;
+import UI.CalendarUI.model.CalendarPanel;
 
 public class MonthView extends JPanel {
 
@@ -190,47 +191,8 @@ public class MonthView extends JPanel {
 
     // 新增：創建包含日期和事件的面板
     private JPanel createDayPanel(int day, List<Event> events) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-
-        // 日期標籤
-        JLabel dayLabel = new JLabel(String.valueOf(day));
-        dayLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        dayLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
-        panel.add(dayLabel, BorderLayout.NORTH);
-
-        // 事件列表
-        if (!events.isEmpty()) {
-            JPanel eventsPanel = new JPanel();
-            eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
-            eventsPanel.setBackground(Color.WHITE);
-
-            // 最多顯示3個事件，避免過度擁擠
-            int maxEventsToShow = Math.min(events.size(), 3);
-            for (int i = 0; i < maxEventsToShow; i++) {
-                Event event = events.get(i);
-                JLabel eventLabel = new JLabel(event.summary);
-                eventLabel.setFont(new Font("SansSerif", Font.PLAIN, 9));
-                eventLabel.setForeground(Color.BLUE);
-                eventLabel.setOpaque(true);
-                eventLabel.setBackground(new Color(220, 230, 255));
-                eventLabel.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 2));
-                eventsPanel.add(eventLabel);
-            }
-
-            // 如果有更多事件，顯示 "..."
-            if (events.size() > maxEventsToShow) {
-                JLabel moreLabel = new JLabel("...");
-                moreLabel.setFont(new Font("SansSerif", Font.PLAIN, 9));
-                moreLabel.setForeground(Color.GRAY);
-                eventsPanel.add(moreLabel);
-            }
-
-            panel.add(eventsPanel, BorderLayout.CENTER);
-        }
-
-        return panel;
+        LocalDate date = LocalDate.of(currentYear, currentMonth, day);
+        return new CalendarPanel(date, events, CalendarPanel.ViewMode.MONTH);
     }
 
     // 新增：獲取指定日期的事件
