@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.io.IOException;
 import java.time.*;
 import java.util.*;
+// Service
+import UI.CalendarUI.service.*;
 
 public class EventPrompt {
     private String Start;
@@ -18,18 +20,18 @@ public class EventPrompt {
     private String Curriculum;
     private String Project;
     private String End;
+    private SimplifiedEvent TargetEvent;
 
-    private String eventTitle = "nothing";
     private String begin = "now";
     private String finish = "15 minutes later";
     private String times = "any";
     private String duration = "15 minutes";
 
-    public EventPrompt(String eventTitle) {
+    public EventPrompt(SimplifiedEvent TargetEvent) {
 
         String languageFile = "src/main/resources/language/English/EventPrompt.json";
         loadLanguageSettings(languageFile);
-        setEventTitle(eventTitle);
+        setTargetEvent(TargetEvent);
     }
 
     private void loadLanguageSettings(String languageFile) {
@@ -68,12 +70,23 @@ public class EventPrompt {
         return defaultValue;
     }
 
-    public void setEventTitle(String eventTitle){
-        this.eventTitle = eventTitle != null ? eventTitle : "nothing";
+    public void setTargetEvent(SimplifiedEvent TargetEvent) {
+        if (TargetEvent == null) {
+            System.err.println("TargetEvent is null, using default event");
+            this.TargetEvent = new SimplifiedEvent("Default Event", "2023-10-01T10:00:00", "2023-10-01T11:00:00", "Default Location", "No description provided");
+        } else {
+            this.TargetEvent = TargetEvent;
+        }
     }
 
-    public String getEventTitle(){
-        return this.eventTitle;
+    public String getTargetEvent(){
+        String eventDetails = "Event Details:\n" +
+                "Title: " + this.TargetEvent.title + "\n" +
+                "Start: " + this.TargetEvent.start + "\n" +
+                "End: " + this.TargetEvent.end + "\n" +
+                "Location: " + this.TargetEvent.location + "\n" +
+                "Description: " + this.TargetEvent.description + "\n";
+        return eventDetails;
     }
 
     public void setTime(String begin, String finish, String times, String duration){
@@ -101,7 +114,7 @@ public class EventPrompt {
 
     public String LearningPrompt() {
         try {
-            String prompt = this.Start + this.jsonToString() + Learning + this.getEventTitle() + this.getTime() + End;
+            String prompt = this.Start + this.jsonToString() + Learning + this.getTargetEvent() + this.getTime() + End;
             System.out.println(prompt);
             return prompt;
         } catch (Exception e) {
@@ -112,7 +125,7 @@ public class EventPrompt {
 
     public String ProjectPrompt() {
         try {
-            String prompt = this.Start + this.jsonToString() + Project + this.getEventTitle() + this.getTime() + End;
+            String prompt = this.Start + this.jsonToString() + Project + this.getTargetEvent() + this.getTime() + End;
             System.out.println(prompt);
             return prompt;
         } catch (Exception e) {

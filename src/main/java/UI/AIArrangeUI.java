@@ -8,14 +8,17 @@ import java.util.Date;
 import com.google.gson.*;
 
 import ChatGPT.EventArranger;
+import DataStructures.*;
 
 public class AIArrangeUI extends JFrame {
-    private String EventName;
+    private SimplifiedEvent TargetEvent = null;
+    private String EventName = null;
     private final String[] begin = {"now", "event start"};
     private final String[] finish = {"3 months", "event end"};
     private final String[] duration = {"15 minutes", "30 minutes", "1 hour", "3 hours"};
-    public AIArrangeUI(String EventName) {
-        this.EventName = EventName;
+    public AIArrangeUI(SimplifiedEvent TargetEvent) {
+        this.TargetEvent = TargetEvent;
+        this.EventName = TargetEvent.title;
         setTitle("AI 行程安排");
         setSize(500, 500);
         setLocationRelativeTo(null);
@@ -129,11 +132,10 @@ public class AIArrangeUI extends JFrame {
 
             EventArranger eventArranger = null;
             try {
-                eventArranger = new EventArranger(option, fromDateStr, toDateStr, String.valueOf(times), tillStr);
+                eventArranger = new EventArranger(option, fromDateStr, toDateStr, String.valueOf(times), tillStr, TargetEvent);
             } catch (FileNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
-            eventArranger.setEventTitle(EventName);
             eventArranger.arrangeEvents();
             JOptionPane.showMessageDialog(null,
                     "事件名稱: " + eventName + "\n" +

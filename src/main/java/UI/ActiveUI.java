@@ -1,6 +1,7 @@
 package UI;
 
 import UI.CalendarUI.CalendarUI;
+import DataStructures.*;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -43,7 +44,8 @@ public class ActiveUI {
         aiArrangeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AIArrangeUI aiArrangeUI = new AIArrangeUI("test");
+                SimplifiedEvent targetEvent = new SimplifiedEvent("test event", "2025-10-01T10:00:00.000+08:00", "2025-10-01T11:00:00.000+08:00", "Online", "This is a test event.");
+                AIArrangeUI aiArrangeUI = new AIArrangeUI(targetEvent);
                 aiArrangeUI.setVisible(true);
             }
         });

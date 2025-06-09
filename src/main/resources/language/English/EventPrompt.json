@@ -1,8 +1,8 @@
 {
-  "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [title], [start], [end], [location], [description] in list.The following json format data is [existing schedule],",
+  "Start": "Please act as a [Learning Assistant] to help me schedule, and provide me with information such as [title], [start], [end], [location], [description] in list.The following json format data in [jsonArray] is [existing schedule],",
   "Learning": "The following json format data is my [target event],please help me to arrange the learning schedule.",
   "Review": "The following json format data is my [target event], please help me to arrange the learning schedule.",
   "Curriculum": "The following csv format data is my [curriculum].",
   "Project": "The following json format data is my [target event],please help me to arrange the working schedule.",
-  "End": "and return only the json format data containing [title], [start], [end], [location], [description] in list.To notice that the [original events] should [not] be included and time format should yyyy-MM-dd'T'HH:mm:ssXXX."
+  "End": "and return only the json format data containing [title], [start], [end], [location], [description] in [jsonArray].To notice that the [original events] should [not] be included and time format should yyyy-MM-dd'T'HH:mm:ssXXX."
 }
