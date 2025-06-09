@@ -111,17 +111,7 @@ public class WeekView extends JPanel {
                 if (col > 0) {
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
                     Object cellValue = weekTable.getValueAt(row, col);
-                    if (cellValue instanceof JPanel) {
-                        JPanel panel = (JPanel) cellValue;
-                        Object eventsObj = panel.getClientProperty("events");
-                        if (eventsObj instanceof List) {
-                            @SuppressWarnings("unchecked")
-                            List<EventInfo> events = (List<EventInfo>) eventsObj;
-                            controller.showEventDialog(selectedDate, events);
-                        }
-                    } else {
-                        controller.handleSelectedWithNewEvent(selectedDate);
-                    }
+                    controller.handleSelectedWithNewEvent(selectedDate);
                 }
             }
         });
@@ -248,7 +238,7 @@ public class WeekView extends JPanel {
             eventPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    controller.showEventDialog(date, List.of(event));
+                    controller.showEventDialog(event);
                 }
             });
 
