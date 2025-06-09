@@ -105,13 +105,25 @@ public class WeekView extends JPanel {
 
         weekTable.setDefaultRenderer(Object.class, new WeekCellRenderer());
         weekTable.addMouseListener(new MouseAdapter() {
+            @SuppressWarnings("unchecked")
             public void mouseClicked(MouseEvent e) {
                 int row = weekTable.rowAtPoint(e.getPoint());
                 int col = weekTable.columnAtPoint(e.getPoint());
                 if (col > 0) {
-                    LocalDate selectedDate = startOfWeek.plusDays(col - 1);
                     Object cellValue = weekTable.getValueAt(row, col);
-                    controller.handleSelectedWithNewEvent(selectedDate);
+                    if (cellValue instanceof JPanel panel) {
+                        Object eventsObj = panel.getClientProperty("events");
+                        if (eventsObj instanceof List<?> events && !events.isEmpty()) {
+                            Object first = events.get(0);
+                            if (first instanceof EventInfo) {
+                                controller.showEventDialog((EventInfo) first);
+                                return;
+                            }
+                        }
+                    }
+
+                    LocalDate selectedDate = startOfWeek.plusDays(col - 1);
+                    controller.showNewEventDialog(selectedDate);
                 }
             }
         });
@@ -235,12 +247,6 @@ public class WeekView extends JPanel {
                     BorderFactory.createEmptyBorder(2, 4, 2, 4)
             ));
 
-            eventPanel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    controller.showEventDialog(event);
-                }
-            });
 
             panel.add(eventPanel);
 
