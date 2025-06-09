@@ -2,6 +2,7 @@ package UI.CalendarUI.controller;
 
 import UI.AIArrangeUI;
 import UI.CalendarUI.model.CalendarModel;
+import UI.CalendarUI.service.EventInfo;
 import UI.CalendarUI.service.EventService;
 import UI.CalendarUI.view.MonthView;
 import UI.CalendarUI.view.WeekView;
@@ -142,7 +143,7 @@ public class CalendarController {
         dialog.setVisible(true);
     }
 
-    public void showEventDialog(LocalDate date, List<Event> events) {
+    public void showEventDialog(LocalDate date, List<EventInfo> events) {
         EventDialog dialog = new EventDialog(
                 SwingUtilities.getWindowAncestor(parentComponent),
                 date,

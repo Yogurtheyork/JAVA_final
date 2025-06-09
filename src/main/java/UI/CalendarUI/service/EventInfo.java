@@ -2,6 +2,7 @@ package UI.CalendarUI.service;
 
 public class EventInfo {
     public String summary;
+    public String location;
     public DateTimeWrapper start;
     public DateTimeWrapper end;
     public String id;
