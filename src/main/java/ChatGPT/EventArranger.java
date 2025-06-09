@@ -63,8 +63,13 @@ public class EventArranger {
             List<SimplifiedEvent> events = gson.fromJson(response, new TypeToken<List<SimplifiedEvent>>(){}.getType());
             for (SimplifiedEvent event : events) {
                 // 將事件寫入 Google Calendar
-                googleService.insertEvent(googleService.createEvent(event.title, event.location, event.description, event.start, event.end));
-            }
+                googleService.insertEvent(googleService.createEvent(
+                        event.title,
+                        event.location,
+                        event.description,
+                        event.start,
+                        event.end
+                ));}
             googleService.fetchAndSaveEvents();
             System.out.println("事件安排完成");
         } catch (IOException e) {
