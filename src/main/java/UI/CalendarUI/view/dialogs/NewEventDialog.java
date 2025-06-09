@@ -14,10 +14,13 @@ public class NewEventDialog extends JDialog {
     private JList<String> timeList;
     private JButton saveButton;
     private JButton cancelButton;
+    private JCheckBox aiCheckBox;
     private LocalDate date;
 
     public interface EventSaveListener {
-        void onSave(String summary, String location, String description, LocalDate date, String startTime, String endTime);
+        void onSave(String summary, String location, String description,
+                    LocalDate date, String startTime, String endTime,
+                    boolean arrangeByAI);
     }
 
     public NewEventDialog(Component parentComponent, LocalDate date, EventSaveListener listener) {
@@ -37,6 +40,8 @@ public class NewEventDialog extends JDialog {
         formPanel.add(locationField);
         formPanel.add(new JLabel("Description:"));
         formPanel.add(new JScrollPane(descriptionArea));
+
+        aiCheckBox = new JCheckBox("Arrange by AI");
 
         panel.add(formPanel, BorderLayout.NORTH);
 
@@ -82,12 +87,16 @@ public class NewEventDialog extends JDialog {
             String startTime = selectedTimes.get(0);
             String endTime = selectedTimes.get(selectedTimes.size() - 1);
 
-            listener.onSave(summary, location, desc, date, startTime, endTime);
+            boolean arrangeByAI = aiCheckBox.isSelected();
+
+            listener.onSave(summary, location, desc, date, startTime, endTime,
+                    arrangeByAI);
             dispose();
         });
 
         cancelButton.addActionListener(e -> dispose());
 
+        buttonPanel.add(aiCheckBox);
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);

@@ -103,14 +103,11 @@ public class CalendarController {
     }
 
     public void showNewEventDialog(LocalDate date) {
-        JCheckBox aiCheckBox = new JCheckBox("Arrange by AI");
-
         NewEventDialog dialog = new NewEventDialog(
                 SwingUtilities.getWindowAncestor(parentComponent),
                 date,
-                (summary, location, description, d, startTime, endTime) -> {
+                (summary, location, description, d, startTime, endTime, arrangeByAI) -> {
                     try {
-                        boolean arrangeByAI = aiCheckBox.isSelected();
                         ZoneId zoneId = ZoneId.systemDefault();
                         ZonedDateTime startDateTime = ZonedDateTime.of(d, java.time.LocalTime.parse(startTime), zoneId);
                         ZonedDateTime endDateTime = ZonedDateTime.of(d, java.time.LocalTime.parse(endTime), zoneId);
@@ -139,7 +136,6 @@ public class CalendarController {
                 }
         );
 
-        dialog.add(aiCheckBox, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
 
