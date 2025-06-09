@@ -1,5 +1,6 @@
 package UI.CalendarUI.view.dialogs;
 
+import UI.AIArrangeUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,6 +15,7 @@ public class NewEventDialog extends JDialog {
     private JList<String> timeList;
     private JButton saveButton;
     private JButton cancelButton;
+    private JCheckBox aiCheckBox;
     private LocalDate date;
 
     public interface EventSaveListener {
@@ -62,6 +64,7 @@ public class NewEventDialog extends JDialog {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         saveButton = new JButton("Save");
         cancelButton = new JButton("Cancel");
+        aiCheckBox = new JCheckBox("Arrange by AI");
 
         saveButton.addActionListener((ActionEvent e) -> {
             String summary = summaryField.getText().trim();
@@ -83,11 +86,16 @@ public class NewEventDialog extends JDialog {
             String endTime = selectedTimes.get(selectedTimes.size() - 1);
 
             listener.onSave(summary, location, desc, date, startTime, endTime);
+            if (aiCheckBox.isSelected()) {
+                AIArrangeUI aiArrangeUI = new AIArrangeUI(summary);
+                aiArrangeUI.setVisible(true);
+            }
             dispose();
         });
 
         cancelButton.addActionListener(e -> dispose());
 
+        buttonPanel.add(aiCheckBox);
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
