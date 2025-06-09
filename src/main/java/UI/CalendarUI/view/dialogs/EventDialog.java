@@ -1,41 +1,132 @@
 package UI.CalendarUI.view.dialogs;
 
-import com.google.api.services.calendar.model.Event;
+import UI.CalendarUI.controller.CalendarController;
+import UI.CalendarUI.service.EventInfo;
+import UI.CalendarUI.service.GoogleCalendarService;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
+/**
+ * Dialog for viewing and editing events on a specific date.
+ */
 public class EventDialog extends JDialog {
+    private final EventInfo event;
+    private final GoogleCalendarService service;
+    private final CalendarController controller;
+    private final LocalDate date;
 
-    public EventDialog(Component parentComponent, List<Event> events) {
-        super(SwingUtilities.getWindowAncestor(parentComponent), "Events on Selected Date", ModalityType.APPLICATION_MODAL);
+    private JTextField summaryField;
+    private JTextField locationField;
+    private JTextField startField;
+    private JTextField endField;
+    private JButton deleteButton;
+    private JButton closeButton;
 
+    public EventDialog(Component parentComponent,
+                       EventInfo event,
+                       GoogleCalendarService service,
+                       CalendarController controller) {
+        super(SwingUtilities.getWindowAncestor(parentComponent),
+                "Event Details", ModalityType.APPLICATION_MODAL);
+        this.event = event;
+        this.service = service;
+        this.controller = controller;
+        this.date = java.time.Instant.ofEpochMilli(event.start.dateTime.value)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        initUI(parentComponent);
+    }
+
+    private void initUI(Component parent) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        JTextArea eventListArea = new JTextArea(15, 40);
-        eventListArea.setEditable(false);
+        JPanel form = new JPanel(new GridLayout(4, 2, 5, 5));
+        summaryField = new JTextField();
+        locationField = new JTextField();
+        startField = new JTextField();
+        endField = new JTextField();
+        form.add(new JLabel("Summary:"));
+        form.add(summaryField);
+        form.add(new JLabel("Location:"));
+        form.add(locationField);
+        form.add(new JLabel("Start (HH:mm):"));
+        form.add(startField);
+        form.add(new JLabel("End (HH:mm):"));
+        form.add(endField);
 
-        StringBuilder sb = new StringBuilder();
-        for (Event event : events) {
-            sb.append("Title: ").append(event.getSummary()).append("\n");
-            sb.append("Description: ").append(event.getDescription() == null ? "" : event.getDescription()).append("\n");
-            sb.append("Start: ").append(event.getStart().getDateTime() != null ? event.getStart().getDateTime().toStringRfc3339() : event.getStart().getDate()).append("\n");
-            sb.append("End: ").append(event.getEnd().getDateTime() != null ? event.getEnd().getDateTime().toStringRfc3339() : event.getEnd().getDate()).append("\n\n");
-        }
-
-        eventListArea.setText(sb.toString());
-        panel.add(new JScrollPane(eventListArea), BorderLayout.CENTER);
-
-        JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
+        JPanel center = new JPanel(new BorderLayout());
+        center.add(form, BorderLayout.CENTER);
+        panel.add(center, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        deleteButton = new JButton("Delete");
+        closeButton = new JButton("Close");
+
+        deleteButton.addActionListener(e -> onDelete());
+        closeButton.addActionListener(e -> dispose());
+
+        buttonPanel.add(deleteButton);
         buttonPanel.add(closeButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        this.setContentPane(panel);
-        this.pack();
-        this.setLocationRelativeTo(parentComponent);
+        setContentPane(panel);
+        pack();
+        setLocationRelativeTo(parent);
+        populateFields();
+    }
+
+    private void populateFields() {
+        summaryField.setEditable(false);
+        locationField.setEditable(false);
+        startField.setEditable(false);
+        endField.setEditable(false);
+
+        summaryField.setText(event.summary);
+        locationField.setText(event.location);
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+        ZonedDateTime startZdt = java.time.Instant.ofEpochMilli(event.start.dateTime.value)
+                .atZone(ZoneId.systemDefault());
+        startField.setText(fmt.format(startZdt.toLocalTime()));
+
+        if (event.end != null && event.end.dateTime != null) {
+            ZonedDateTime endZdt = java.time.Instant.ofEpochMilli(event.end.dateTime.value)
+                    .atZone(ZoneId.systemDefault());
+            endField.setText(fmt.format(endZdt.toLocalTime()));
+        } else {
+            endField.setText("");
+        }
+    }
+
+
+    private void onDelete() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete this event?", "Confirm", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            service.deleteEvent(event.id);
+            refreshViews();
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error deleting event: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshViews() throws Exception {
+        service.fetchAndSaveEvents();
+        if (controller != null) {
+            controller.handleMonthSelected(date);
+            controller.handleWeekSelected(date);
+        }
     }
 }

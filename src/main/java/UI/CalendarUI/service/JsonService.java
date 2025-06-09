@@ -1,6 +1,6 @@
 package UI.CalendarUI.service;
 
-import UI.CalendarUI.service.Event;
+import UI.CalendarUI.service.EventInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.FileNotFoundException;
@@ -28,23 +28,22 @@ public class JsonService {
 
     // 方法：回傳事件資訊
     public void getEventInfo(){
-        Type listType = new TypeToken<List<Event>>(){}.getType(); // 定義事件列表的型別
-        List<Event> ListEvents = gson.fromJson(reader, listType); // 從 JSON 檔案中解析事件列表
+        Type listType = new TypeToken<List<EventInfo>>(){}.getType();
+        List<EventInfo> ListEvents = gson.fromJson(reader, listType);
 
-        // 遍歷事件列表並列印每個事件的摘要、開始時間和結束時間
-        for (Event e  : ListEvents){
+        for (EventInfo e  : ListEvents){
             System.out.println("Summary: " + e.summary + " Start value " + e.start.dateTime.value + " End value " + e.end.dateTime.value);
         }
     }
 
-    // 方法：獲取所有事件
-    public List<Event> getAllEvents() {
+    // 新增：獲取所有事件的方法
+    public List<EventInfo> getAllEvents() {
         try {
             // 每次調用都重新創建 FileReader，確保讀取最新資料
             FileReader reader = new FileReader(EVENTS_FILE_PATH);
-            Type listType = new TypeToken<List<Event>>(){}.getType(); // 定義事件列表的型別
-            List<Event> events = gson.fromJson(reader, listType); // 從 JSON 檔案中解析事件列表
-            reader.close(); // 關閉檔案讀取器
+            Type listType = new TypeToken<List<EventInfo>>(){}.getType();
+            List<EventInfo> events = gson.fromJson(reader, listType);
+            reader.close();
 
             return events != null ? events : new ArrayList<>(); // 如果事件列表為 null，回傳空列表
         } catch (Exception e) {

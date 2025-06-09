@@ -2,6 +2,7 @@ package UI.CalendarUI.controller;
 
 import UI.AIArrangeUI;
 import UI.CalendarUI.model.CalendarModel;
+import UI.CalendarUI.service.EventInfo;
 import UI.CalendarUI.service.EventService;
 import UI.CalendarUI.view.MonthView;
 import UI.CalendarUI.view.WeekView;
@@ -51,17 +52,6 @@ public class CalendarController {
         this.viewSwitcher = viewSwitcher;
     }
 
-    public void handleDateSelected(LocalDate date) {
-        List<Event> events = service.getEventsOnDate(date);
-        model.setEventsForDate(date, events);
-
-        if (events.isEmpty()) {
-            showNewEventDialog(date);
-        } else {
-            showEventDialog(date, events);
-        }
-    }
-
     public void handleMonthSelected(LocalDate date) {
         if (monthView != null) {
             monthView.update(date);
@@ -92,8 +82,8 @@ public class CalendarController {
         }
     }
 
-    // 新增：處理週選擇並彈出新事件對話框
-    public void handleWeekSelectedWithNewEvent(LocalDate date) {
+    // 新增：處理選擇日期並彈出新事件對話框
+    public void handleSelectedWithNewEvent(LocalDate date) {
         // 先切換到週視圖
         if (weekView != null) {
             weekView.update(date);
@@ -144,8 +134,12 @@ public class CalendarController {
         dialog.setVisible(true);
     }
 
-    private void showEventDialog(LocalDate date, List<Event> events) {
-        EventDialog dialog = new EventDialog(SwingUtilities.getWindowAncestor(parentComponent), events);
+    public void showEventDialog(EventInfo event) {
+        EventDialog dialog = new EventDialog(
+                SwingUtilities.getWindowAncestor(parentComponent),
+                event,
+                service,
+                this);
         dialog.setVisible(true);
     }
 }

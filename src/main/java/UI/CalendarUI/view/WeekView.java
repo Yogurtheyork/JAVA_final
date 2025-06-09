@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.service.JsonService;
-import UI.CalendarUI.service.Event;
+import UI.CalendarUI.service.EventInfo;
 
 public class WeekView extends JPanel {
 
@@ -109,8 +109,20 @@ public class WeekView extends JPanel {
                 int row = weekTable.rowAtPoint(e.getPoint());
                 int col = weekTable.columnAtPoint(e.getPoint());
                 if (col > 0) {
+                    Object cellValue = weekTable.getValueAt(row, col);
+                    if (cellValue instanceof JPanel) {
+                        JPanel panel = (JPanel) cellValue;
+                        if (panel.getClientProperty("events") != null) {
+                            List<EventInfo> events = (List<EventInfo>) panel.getClientProperty("events");
+                            if (!events.isEmpty()) {
+                                controller.showEventDialog(events.get(0));
+                                return;
+                            }
+                        }
+                    }
+                    // 如果點擊的是空儲存格或沒有事件的面板，顯示新事件對話框
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
-                    controller.handleDateSelected(selectedDate);
+                    controller.showNewEventDialog(selectedDate);
                 }
             }
         });
@@ -133,8 +145,8 @@ public class WeekView extends JPanel {
         weekLabel.setText(weekRange);
 
         // 獲取本週的所有事件
-        List<Event> allEvents = jsonService.getAllEvents();
-        List<Event> weekEvents = getEventsForWeek(allEvents, startOfWeek);
+        List<EventInfo> allEvents = jsonService.getAllEvents();
+        List<EventInfo> weekEvents = getEventsForWeek(allEvents, startOfWeek);
 
         tableModel.setRowCount(0);
         for (int hour = 0; hour < 24; hour++) {
@@ -144,10 +156,10 @@ public class WeekView extends JPanel {
             // 為每一天檢查是否有事件
             for (int dayIndex = 0; dayIndex < 7; dayIndex++) {
                 LocalDate currentDate = startOfWeek.plusDays(dayIndex);
-                List<Event> dayHourEvents = getEventsForDateAndHour(weekEvents, currentDate, hour);
+                List<EventInfo> dayHourEvents = getEventsForDateAndHour(weekEvents, currentDate, hour);
 
                 if (!dayHourEvents.isEmpty()) {
-                    row[dayIndex + 1] = createEventCellContent(dayHourEvents);
+                    row[dayIndex + 1] = createEventCellContent(dayHourEvents, currentDate);
                 } else {
                     row[dayIndex + 1] = "";
                 }
@@ -157,7 +169,7 @@ public class WeekView extends JPanel {
     }
 
     // 新增：獲取指定週的所有事件
-    private List<Event> getEventsForWeek(List<Event> allEvents, LocalDate weekStart) {
+    private List<EventInfo> getEventsForWeek(List<EventInfo> allEvents, LocalDate weekStart) {
         LocalDate weekEnd = weekStart.plusDays(6);
         return allEvents.stream()
                 .filter(event -> {
@@ -170,7 +182,7 @@ public class WeekView extends JPanel {
     }
 
     // 新增：獲取指定日期和小時的事件
-    private List<Event> getEventsForDateAndHour(List<Event> events, LocalDate date, int hour) {
+    private List<EventInfo> getEventsForDateAndHour(List<EventInfo> events, LocalDate date, int hour) {
         return events.stream()
                 .filter(event -> {
                     LocalDateTime eventDateTime = Instant.ofEpochMilli(event.start.dateTime.value)
@@ -203,15 +215,16 @@ public class WeekView extends JPanel {
     }
 
     // 新增：創建事件儲存格內容
-    private JPanel createEventCellContent(List<Event> events) {
+    private JPanel createEventCellContent(List<EventInfo> events, LocalDate date) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.WHITE);
+        panel.putClientProperty("events", events);
 
         // 最多顯示2個事件，避免過度擁擠
         int maxEventsToShow = Math.min(events.size(), 2);
         for (int i = 0; i < maxEventsToShow; i++) {
-            Event event = events.get(i);
+            EventInfo event = events.get(i);
 
             // 格式化事件顯示
             LocalDateTime startTime = Instant.ofEpochMilli(event.start.dateTime.value)
@@ -221,22 +234,21 @@ public class WeekView extends JPanel {
             String timeStr = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String displayText = timeStr + " " + event.summary;
 
-            JLabel eventLabel = new JLabel(displayText);
-            eventLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-            eventLabel.setForeground(Color.WHITE);
-            eventLabel.setOpaque(true);
-            eventLabel.setBackground(new Color(70, 130, 180)); // 鋼藍色
-            eventLabel.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-
-            // 設置圓角邊框效果
-            eventLabel.setBorder(BorderFactory.createCompoundBorder(
+            JPanel eventPanel = new JPanel(new BorderLayout());
+            JLabel label = new JLabel(displayText);
+            label.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            label.setForeground(Color.WHITE);
+            eventPanel.add(label, BorderLayout.CENTER);
+            eventPanel.setOpaque(true);
+            eventPanel.setBackground(new Color(70, 130, 180));
+            eventPanel.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(50, 100, 150), 1),
-                    BorderFactory.createEmptyBorder(1, 3, 1, 3)
+                    BorderFactory.createEmptyBorder(2, 4, 2, 4)
             ));
 
-            panel.add(eventLabel);
 
-            // 在事件之間添加小間距
+            panel.add(eventPanel);
+
             if (i < maxEventsToShow - 1) {
                 panel.add(Box.createVerticalStrut(2));
             }
