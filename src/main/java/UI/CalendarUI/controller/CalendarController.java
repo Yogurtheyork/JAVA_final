@@ -51,17 +51,6 @@ public class CalendarController {
         this.viewSwitcher = viewSwitcher;
     }
 
-    public void handleDateSelected(LocalDate date) {
-        List<Event> events = service.getEventsOnDate(date);
-        model.setEventsForDate(date, events);
-
-        if (events.isEmpty()) {
-            showNewEventDialog(date);
-        } else {
-            showEventDialog(date, events);
-        }
-    }
-
     public void handleMonthSelected(LocalDate date) {
         if (monthView != null) {
             monthView.update(date);
@@ -132,7 +121,7 @@ public class CalendarController {
                         service.insertEvent(newEvent);
                         if (arrangeByAI) {
                             AIArrangeUI aiArrangeUI = new AIArrangeUI(summary);
-                            aiArrangeUI.setVisible(true);//TODO AI行程安排視窗fech and save events
+                            aiArrangeUI.setVisible(true);//TODO AI行程安排視窗fetch and save events
                         }
                         service.fetchAndSaveEvents();
 

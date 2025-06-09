@@ -110,7 +110,6 @@ public class WeekView extends JPanel {
                 int col = weekTable.columnAtPoint(e.getPoint());
                 if (col > 0) {
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
-                    controller.handleDateSelected(selectedDate);
                 }
             }
         });

@@ -119,12 +119,16 @@ public class MonthView extends JPanel {
                         String dayText = dayLabel.getText();
                         if (!dayText.isEmpty()) {
                             LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, Integer.parseInt(dayText));
-
-                            // 雙擊進入週視圖並彈出新事件對話框，單擊選擇日期
-                            if (e.getClickCount() == 1) {
-                                controller.handleWeekSelectedWithNewEvent(selectedDate);
-                            } else {
-                                controller.handleDateSelected(selectedDate);
+                            // 檢查該日期是否有事件
+                            List<Event> eventsForDate = getEventsForDate(jsonService.getAllEvents(), selectedDate);
+                            if (e.getClickCount() == 2) {
+                                if (eventsForDate.isEmpty()) {
+                                    // 如果沒有事件，先切換到週視圖，然後彈出新事件對話框
+                                    controller.handleWeekSelectedWithNewEvent(selectedDate);
+                                } else {
+                                    // 如果有事件，只切換到週視圖
+                                    controller.handleWeekSelectedWithEditEvent(selectedDate, (String) getClientProperty("id"));
+                                }
                             }
                         }
                     }
@@ -145,6 +149,7 @@ public class MonthView extends JPanel {
         updateCalendar();
     }
 
+    // 刷新月視圖
     private void updateCalendar() {
         monthLabel.setText(currentYear + " - " + String.format("%02d", currentMonth));
         YearMonth yearMonth = YearMonth.of(currentYear, currentMonth);
@@ -174,9 +179,6 @@ public class MonthView extends JPanel {
             }
             tableModel.addRow(cells[row]);
         }
-
-        // 移除這行，因為我們現在直接在 updateCalendar 中處理事件顯示
-        // controller.checkEvents();
     }
 
     // 新增：創建空的日期面板
@@ -211,6 +213,8 @@ public class MonthView extends JPanel {
             for (int i = 0; i < maxEventsToShow; i++) {
                 Event event = events.get(i);
                 JLabel eventLabel = new JLabel(event.summary);
+                // 新增 putClientProperty 方法，讓panel標註事件ID用於刪除
+                eventLabel.putClientProperty("id", event.id);
                 eventLabel.setFont(new Font("SansSerif", Font.PLAIN, 9));
                 eventLabel.setForeground(Color.BLUE);
                 eventLabel.setOpaque(true);

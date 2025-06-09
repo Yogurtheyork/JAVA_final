@@ -4,6 +4,7 @@ public class Event {
     public String summary;
     public DateTimeWrapper start;
     public DateTimeWrapper end;
+    public String id;
 
     public static class DateTimeWrapper {
         public InnerDateTime dateTime;
