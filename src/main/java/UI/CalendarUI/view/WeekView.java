@@ -110,6 +110,18 @@ public class WeekView extends JPanel {
                 int col = weekTable.columnAtPoint(e.getPoint());
                 if (col > 0) {
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
+                    Object cellValue = weekTable.getValueAt(row, col);
+                    if (cellValue instanceof JPanel) {
+                        JPanel panel = (JPanel) cellValue;
+                        Object eventsObj = panel.getClientProperty("events");
+                        if (eventsObj instanceof List) {
+                            @SuppressWarnings("unchecked")
+                            List<Event> events = (List<Event>) eventsObj;
+                            controller.showEventDialog(selectedDate, events);
+                        }
+                    } else {
+                        controller.handleSelectedWithNewEvent(selectedDate);
+                    }
                 }
             }
         });
@@ -146,7 +158,7 @@ public class WeekView extends JPanel {
                 List<Event> dayHourEvents = getEventsForDateAndHour(weekEvents, currentDate, hour);
 
                 if (!dayHourEvents.isEmpty()) {
-                    row[dayIndex + 1] = createEventCellContent(dayHourEvents);
+                    row[dayIndex + 1] = createEventCellContent(dayHourEvents, currentDate);
                 } else {
                     row[dayIndex + 1] = "";
                 }
@@ -202,10 +214,11 @@ public class WeekView extends JPanel {
     }
 
     // 新增：創建事件儲存格內容
-    private JPanel createEventCellContent(List<Event> events) {
+    private JPanel createEventCellContent(List<Event> events, LocalDate date) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.WHITE);
+        panel.putClientProperty("events", events);
 
         // 最多顯示2個事件，避免過度擁擠
         int maxEventsToShow = Math.min(events.size(), 2);
@@ -220,22 +233,27 @@ public class WeekView extends JPanel {
             String timeStr = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String displayText = timeStr + " " + event.summary;
 
-            JLabel eventLabel = new JLabel(displayText);
-            eventLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-            eventLabel.setForeground(Color.WHITE);
-            eventLabel.setOpaque(true);
-            eventLabel.setBackground(new Color(70, 130, 180)); // 鋼藍色
-            eventLabel.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-
-            // 設置圓角邊框效果
-            eventLabel.setBorder(BorderFactory.createCompoundBorder(
+            JPanel eventPanel = new JPanel(new BorderLayout());
+            JLabel label = new JLabel(displayText);
+            label.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            label.setForeground(Color.WHITE);
+            eventPanel.add(label, BorderLayout.CENTER);
+            eventPanel.setOpaque(true);
+            eventPanel.setBackground(new Color(70, 130, 180));
+            eventPanel.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(50, 100, 150), 1),
-                    BorderFactory.createEmptyBorder(1, 3, 1, 3)
+                    BorderFactory.createEmptyBorder(2, 4, 2, 4)
             ));
 
-            panel.add(eventLabel);
+            eventPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    controller.showEventDialog(date, List.of(event));
+                }
+            });
 
-            // 在事件之間添加小間距
+            panel.add(eventPanel);
+
             if (i < maxEventsToShow - 1) {
                 panel.add(Box.createVerticalStrut(2));
             }

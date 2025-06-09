@@ -81,8 +81,8 @@ public class CalendarController {
         }
     }
 
-    // 新增：處理週選擇並彈出新事件對話框
-    public void handleWeekSelectedWithNewEvent(LocalDate date) {
+    // 新增：處理選擇日期並彈出新事件對話框
+    public void handleSelectedWithNewEvent(LocalDate date) {
         // 先切換到週視圖
         if (weekView != null) {
             weekView.update(date);
@@ -142,7 +142,7 @@ public class CalendarController {
         dialog.setVisible(true);
     }
 
-    private void showEventDialog(LocalDate date, List<Event> events) {
+    public void showEventDialog(LocalDate date, List<Event> events) {
         EventDialog dialog = new EventDialog(
                 SwingUtilities.getWindowAncestor(parentComponent),
                 date,
