@@ -105,23 +105,22 @@ public class WeekView extends JPanel {
 
         weekTable.setDefaultRenderer(Object.class, new WeekCellRenderer());
         weekTable.addMouseListener(new MouseAdapter() {
-            @SuppressWarnings("unchecked")
             public void mouseClicked(MouseEvent e) {
                 int row = weekTable.rowAtPoint(e.getPoint());
                 int col = weekTable.columnAtPoint(e.getPoint());
                 if (col > 0) {
                     Object cellValue = weekTable.getValueAt(row, col);
-                    if (cellValue instanceof JPanel panel) {
-                        Object eventsObj = panel.getClientProperty("events");
-                        if (eventsObj instanceof List<?> events && !events.isEmpty()) {
-                            Object first = events.get(0);
-                            if (first instanceof EventInfo) {
-                                controller.showEventDialog((EventInfo) first);
+                    if (cellValue instanceof JPanel) {
+                        JPanel panel = (JPanel) cellValue;
+                        if (panel.getClientProperty("events") != null) {
+                            List<EventInfo> events = (List<EventInfo>) panel.getClientProperty("events");
+                            if (!events.isEmpty()) {
+                                controller.showEventDialog(events.get(0));
                                 return;
                             }
                         }
                     }
-
+                    // 如果點擊的是空儲存格或沒有事件的面板，顯示新事件對話框
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
                     controller.showNewEventDialog(selectedDate);
                 }
