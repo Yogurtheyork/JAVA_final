@@ -119,16 +119,10 @@ public class MonthView extends JPanel {
                         String dayText = dayLabel.getText();
                         if (!dayText.isEmpty()) {
                             LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, Integer.parseInt(dayText));
-                            // 檢查該日期是否有事件
-                            List<Event> eventsForDate = getEventsForDate(jsonService.getAllEvents(), selectedDate);
-                            if (e.getClickCount() == 2) {
-                                if (eventsForDate.isEmpty()) {
-                                    // 如果沒有事件，先切換到週視圖，然後彈出新事件對話框
-                                    controller.handleWeekSelectedWithNewEvent(selectedDate);
-                                } else {
-                                    // 如果有事件，只切換到週視圖
-                                    controller.handleWeekSelectedWithEditEvent(selectedDate, (String) getClientProperty("id"));
-                                }
+
+                            // 單擊切換到週視圖
+                            if (e.getClickCount() == 1) {
+                                controller.handleWeekSelected(selectedDate);
                             }
                         }
                     }
