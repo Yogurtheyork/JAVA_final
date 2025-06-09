@@ -120,11 +120,9 @@ public class MonthView extends JPanel {
                         if (!dayText.isEmpty()) {
                             LocalDate selectedDate = LocalDate.of(currentYear, currentMonth, Integer.parseInt(dayText));
 
-                            // 雙擊進入週視圖並彈出新事件對話框，單擊選擇日期
+                            // 單擊切換到週視圖
                             if (e.getClickCount() == 1) {
-                                controller.handleWeekSelectedWithNewEvent(selectedDate);
-                            } else {
-                                controller.handleDateSelected(selectedDate);
+                                controller.handleWeekSelected(selectedDate);
                             }
                         }
                     }
