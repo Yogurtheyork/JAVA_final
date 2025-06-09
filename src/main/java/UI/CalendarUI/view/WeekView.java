@@ -111,7 +111,19 @@ public class WeekView extends JPanel {
                 if (col > 0) {
                     LocalDate selectedDate = startOfWeek.plusDays(col - 1);
                     Object cellValue = weekTable.getValueAt(row, col);
-                    controller.handleSelectedWithNewEvent(selectedDate);
+
+                    // If the cell contains event(s), show the event dialog for the first event
+                    if (cellValue instanceof JPanel panel) {
+                        Object eventsObj = panel.getClientProperty("events");
+                        if (eventsObj instanceof List<?> list && !list.isEmpty()) {
+                            EventInfo event = (EventInfo) list.get(0);
+                            controller.showEventDialog(event);
+                            return;
+                        }
+                    }
+
+                    // No events found for this slot, open the new event dialog
+                    controller.showNewEventDialog(selectedDate);
                 }
             }
         });
