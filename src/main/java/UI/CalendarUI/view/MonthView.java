@@ -15,7 +15,7 @@ import java.util.List;
 import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.utils.DateUtils;
 import UI.CalendarUI.service.JsonService;
-import UI.CalendarUI.service.Event;
+import UI.CalendarUI.service.EventInfo;
 
 public class MonthView extends JPanel {
 
@@ -156,7 +156,7 @@ public class MonthView extends JPanel {
         Object[][] cells = new Object[6][7];
 
         // 獲取所有事件
-        List<Event> allEvents = jsonService.getAllEvents();
+        List<EventInfo> allEvents = jsonService.getAllEvents();
 
         int dayCounter = 1;
         for (int row = 0; row < 6; row++) {
@@ -185,7 +185,7 @@ public class MonthView extends JPanel {
     }
 
     // 新增：創建包含日期和事件的面板
-    private JPanel createDayPanel(int day, List<Event> events) {
+    private JPanel createDayPanel(int day, List<EventInfo> events) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -205,7 +205,7 @@ public class MonthView extends JPanel {
             // 最多顯示3個事件，避免過度擁擠
             int maxEventsToShow = Math.min(events.size(), 3);
             for (int i = 0; i < maxEventsToShow; i++) {
-                Event event = events.get(i);
+                EventInfo event = events.get(i);
                 JLabel eventLabel = new JLabel(event.summary);
                 // 新增 putClientProperty 方法，讓panel標註事件ID用於刪除
                 eventLabel.putClientProperty("id", event.id);
@@ -232,7 +232,7 @@ public class MonthView extends JPanel {
     }
 
     // 新增：獲取指定日期的事件
-    private List<Event> getEventsForDate(List<Event> allEvents, LocalDate date) {
+    private List<EventInfo> getEventsForDate(List<EventInfo> allEvents, LocalDate date) {
         return allEvents.stream()
                 .filter(event -> {
                     // 將事件的時間戳轉換為 LocalDate

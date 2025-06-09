@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.service.JsonService;
-import UI.CalendarUI.service.Event;
+import UI.CalendarUI.service.EventInfo;
 
 public class WeekView extends JPanel {
 
@@ -116,7 +116,7 @@ public class WeekView extends JPanel {
                         Object eventsObj = panel.getClientProperty("events");
                         if (eventsObj instanceof List) {
                             @SuppressWarnings("unchecked")
-                            List<Event> events = (List<Event>) eventsObj;
+                            List<EventInfo> events = (List<EventInfo>) eventsObj;
                             controller.showEventDialog(selectedDate, events);
                         }
                     } else {
@@ -144,8 +144,8 @@ public class WeekView extends JPanel {
         weekLabel.setText(weekRange);
 
         // 獲取本週的所有事件
-        List<Event> allEvents = jsonService.getAllEvents();
-        List<Event> weekEvents = getEventsForWeek(allEvents, startOfWeek);
+        List<EventInfo> allEvents = jsonService.getAllEvents();
+        List<EventInfo> weekEvents = getEventsForWeek(allEvents, startOfWeek);
 
         tableModel.setRowCount(0);
         for (int hour = 0; hour < 24; hour++) {
@@ -155,7 +155,7 @@ public class WeekView extends JPanel {
             // 為每一天檢查是否有事件
             for (int dayIndex = 0; dayIndex < 7; dayIndex++) {
                 LocalDate currentDate = startOfWeek.plusDays(dayIndex);
-                List<Event> dayHourEvents = getEventsForDateAndHour(weekEvents, currentDate, hour);
+                List<EventInfo> dayHourEvents = getEventsForDateAndHour(weekEvents, currentDate, hour);
 
                 if (!dayHourEvents.isEmpty()) {
                     row[dayIndex + 1] = createEventCellContent(dayHourEvents, currentDate);
@@ -168,7 +168,7 @@ public class WeekView extends JPanel {
     }
 
     // 新增：獲取指定週的所有事件
-    private List<Event> getEventsForWeek(List<Event> allEvents, LocalDate weekStart) {
+    private List<EventInfo> getEventsForWeek(List<EventInfo> allEvents, LocalDate weekStart) {
         LocalDate weekEnd = weekStart.plusDays(6);
         return allEvents.stream()
                 .filter(event -> {
@@ -181,7 +181,7 @@ public class WeekView extends JPanel {
     }
 
     // 新增：獲取指定日期和小時的事件
-    private List<Event> getEventsForDateAndHour(List<Event> events, LocalDate date, int hour) {
+    private List<EventInfo> getEventsForDateAndHour(List<EventInfo> events, LocalDate date, int hour) {
         return events.stream()
                 .filter(event -> {
                     LocalDateTime eventDateTime = Instant.ofEpochMilli(event.start.dateTime.value)
@@ -214,7 +214,7 @@ public class WeekView extends JPanel {
     }
 
     // 新增：創建事件儲存格內容
-    private JPanel createEventCellContent(List<Event> events, LocalDate date) {
+    private JPanel createEventCellContent(List<EventInfo> events, LocalDate date) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.WHITE);
@@ -223,7 +223,7 @@ public class WeekView extends JPanel {
         // 最多顯示2個事件，避免過度擁擠
         int maxEventsToShow = Math.min(events.size(), 2);
         for (int i = 0; i < maxEventsToShow; i++) {
-            Event event = events.get(i);
+            EventInfo event = events.get(i);
 
             // 格式化事件顯示
             LocalDateTime startTime = Instant.ofEpochMilli(event.start.dateTime.value)

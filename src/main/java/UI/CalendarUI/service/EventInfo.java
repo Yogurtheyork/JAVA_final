@@ -1,6 +1,6 @@
 package UI.CalendarUI.service;
 
-public class Event {
+public class EventInfo {
     public String summary;
     public DateTimeWrapper start;
     public DateTimeWrapper end;
