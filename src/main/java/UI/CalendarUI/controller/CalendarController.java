@@ -154,7 +154,12 @@ public class CalendarController {
     }
 
     private void showEventDialog(LocalDate date, List<Event> events) {
-        EventDialog dialog = new EventDialog(SwingUtilities.getWindowAncestor(parentComponent), events);
+        EventDialog dialog = new EventDialog(
+                SwingUtilities.getWindowAncestor(parentComponent),
+                date,
+                events,
+                service,
+                this);
         dialog.setVisible(true);
     }
 }
