@@ -13,6 +13,9 @@ import java.util.*;
 // Service
 import UI.CalendarUI.service.*;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 public class EventPrompt {
     private String Start;
     private String Learning;
@@ -102,10 +105,18 @@ public class EventPrompt {
 
     public String ReviewPrompt() {
         try {
-            String CURRICULUMPATH = "src/main/resources/curriculum.csv";
-            String prompt = this.Start + this.jsonToString() + this.Curriculum + CSVToString(CURRICULUMPATH) + this.Review + this.getTime() + this.End;
-            System.out.println(prompt);
-            return prompt;
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("載入課程表");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("課程表文件 (*.csv)", "csv"));
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                String CURRICULUMPATH = fileChooser.getSelectedFile().getAbsolutePath();
+                String prompt = this.Start + this.jsonToString() + this.Curriculum + CSVToString(CURRICULUMPATH) + this.Review + this.getTime() + this.End;
+                System.out.println(prompt);
+                return prompt;
+            } else {
+                throw new Exception("未選擇課程表文件");
+            }
         } catch (Exception e) {
             System.err.println("產生複習 Prompt 時發生錯誤: " + e.getMessage());
             return "產生複習 Prompt 失敗";
