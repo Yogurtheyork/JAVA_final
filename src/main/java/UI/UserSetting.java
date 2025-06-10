@@ -19,7 +19,7 @@ public class UserSetting extends JFrame {
     private JComboBox<String> sizeComboBox;
     private JCheckBox autoStartCheckBox;
     private static final String FILE_PATH = "src/main/resources/userSetting.json";
-    private static final Setting DEFAULT_SETTING = new Setting("en", "Normal", true);
+    private static final Setting DEFAULT_SETTING = new Setting("en", "Normal");
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private String Title, Language, Size, Large, Normal, Small, Save, Default, Saved, Defaulted, Error;
@@ -48,7 +48,6 @@ public class UserSetting extends JFrame {
             Saved = jsonObject.getAsJsonObject("Messages").get("Saved").getAsString();
             Defaulted = jsonObject.getAsJsonObject("Messages").get("Defaulted").getAsString();
             Error = jsonObject.getAsJsonObject("Messages").get("Error").getAsString();
-            //TODO: 語言設定
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,12 +95,12 @@ public class UserSetting extends JFrame {
     private void saveSetting() {
         Setting setting = new Setting(
                 (String) languageComboBox.getSelectedItem(),
-                (String) sizeComboBox.getSelectedItem(),
-                autoStartCheckBox.isSelected()
+                (String) sizeComboBox.getSelectedItem()
         );
         try (Writer writer = new FileWriter(FILE_PATH)) {
             gson.toJson(setting, writer);
             JOptionPane.showMessageDialog(this, Saved);
+            this.dispose();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, Error + e.getMessage());
         }
@@ -135,6 +134,5 @@ public class UserSetting extends JFrame {
     private void applySetting(Setting setting) {
         languageComboBox.setSelectedItem(setting.language);
         sizeComboBox.setSelectedItem(setting.fontSize);
-        autoStartCheckBox.setSelected(setting.autoStart);
     }
 }

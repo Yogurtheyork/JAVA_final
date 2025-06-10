@@ -1,21 +1,16 @@
-{
-  "Title": "User Settings",
+{ "Title": "User Settings",
   "Labels": {
     "Language": "Language: ",
-    "Size": "Font Size: "
-  },
+    "Size": "Font Size: " },
   "Sizes": {
     "Small": "Small",
     "Normal": "Normal",
-    "Large": "Large"
-  },
+    "Large": "Large" },
   "Buttons": {
     "Save": "Save",
-    "Default": "Default"
-  },
+    "Default": "Default" },
   "Messages": {
-    "Saved": "Settings have been saved",
+    "Saved": "Settings have been saved\nSettings will be applied after restart",
     "Defaulted": "Settings have been reset to default",
-    "Error": "Error saving settings: "
-  }
+    "Error": "Error saving settings: " }
 }
