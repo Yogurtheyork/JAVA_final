@@ -3,6 +3,7 @@ package UI.CalendarUI.view.dialogs;
 import UI.CalendarUI.controller.CalendarController;
 import UI.CalendarUI.service.EventInfo;
 import UI.CalendarUI.service.GoogleCalendarService;
+import UI.AIArrangeUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +27,7 @@ public class EventDialog extends JDialog {
     private JTextField endField;
     private JButton deleteButton;
     private JButton closeButton;
+    private JButton aiArrangeButton;
 
     public EventDialog(Component parentComponent,
                        EventInfo event,
@@ -66,10 +68,13 @@ public class EventDialog extends JDialog {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         deleteButton = new JButton("Delete");
         closeButton = new JButton("Close");
+        aiArrangeButton = new JButton("AI Arrange");
 
         deleteButton.addActionListener(e -> onDelete());
         closeButton.addActionListener(e -> dispose());
+        aiArrangeButton.addActionListener(e -> onAIArrange());
 
+        buttonPanel.add(aiArrangeButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(closeButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -103,6 +108,12 @@ public class EventDialog extends JDialog {
         }
     }
 
+    private void onAIArrange() {
+        AIArrangeUI aiArrangeUI = new AIArrangeUI(summaryField.getText());
+        aiArrangeUI.setLocationRelativeTo(this);
+        aiArrangeUI.setVisible(true);
+        dispose();
+    }
 
     private void onDelete() {
         int confirm = JOptionPane.showConfirmDialog(this,
