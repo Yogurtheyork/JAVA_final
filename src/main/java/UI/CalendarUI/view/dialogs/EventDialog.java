@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import DataStructures.*;
 
 /**
  * Dialog for viewing and editing events on a specific date.
@@ -109,7 +110,14 @@ public class EventDialog extends JDialog {
     }
 
     private void onAIArrange() {
-        AIArrangeUI aiArrangeUI = new AIArrangeUI(summaryField.getText());
+        SimplifiedEvent targetEvent = new SimplifiedEvent(
+                event.id,
+                event.summary,
+                event.location,
+                "這格不用填",
+                "目前用不到"
+        );
+        AIArrangeUI aiArrangeUI = new AIArrangeUI(targetEvent);
         aiArrangeUI.setLocationRelativeTo(this);
         aiArrangeUI.setVisible(true);
         dispose();
