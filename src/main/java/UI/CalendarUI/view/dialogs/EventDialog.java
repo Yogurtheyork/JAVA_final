@@ -111,11 +111,11 @@ public class EventDialog extends JDialog {
 
     private void onAIArrange() {
         SimplifiedEvent targetEvent = new SimplifiedEvent(
-                event.id,
                 event.summary,
-                event.location,
                 "這格不用填",
-                "目前用不到"
+                "目前用不到",
+                "這格不用填",
+                event.location
         );
         AIArrangeUI aiArrangeUI = new AIArrangeUI(targetEvent);
         aiArrangeUI.setLocationRelativeTo(this);
